@@ -1,0 +1,2 @@
+# FinCoach
+A GenAI 
