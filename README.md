@@ -1,4 +1,4 @@
-# FinCoach clickable prototype
+﻿# FinCoach clickable prototype
 
 This folder is ready to upload to a static host.
 
@@ -16,7 +16,7 @@ The analytics helper records:
 - onboarding actions
 - habit and settings interactions
 
-By default, it stores events in `window.__fincoachAnalyticsQueue` so the prototype still works even before you pick a provider.
+By default it stores events in `window.__fincoachAnalyticsQueue` so the prototype still works even before you pick a provider.
 
 To connect a provider later, set a small config before the analytics script runs:
 
@@ -34,5 +34,3 @@ Or use `provider: 'posthog'` if you decide to wire PostHog.
 
 ## Local preview
 Open `index.html` directly or serve the folder with any static server.
-
-Update: triggering GitHub Pages rebuild
