@@ -16,7 +16,7 @@ The analytics helper records:
 - onboarding actions
 - habit and settings interactions
 
-By default it stores events in `window.__fincoachAnalyticsQueue` so the prototype still works even before you pick a provider.
+By default, it stores events in `window.__fincoachAnalyticsQueue` so the prototype still works even before you pick a provider.
 
 To connect a provider later, set a small config before the analytics script runs:
 
