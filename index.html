@@ -1,0 +1,4591 @@
+﻿<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FinCoach Prototype</title>
+    <style>
+:root {
+  --ink: #121826;
+  --muted: #647082;
+  --line: rgba(18, 24, 38, 0.1);
+  --surface: #fbfcff;
+  --panel: rgba(255, 255, 255, 0.82);
+  --panel-strong: #ffffff;
+  --teal: #13d5b2;
+  --blue: #3157ff;
+  --violet: #7c4dff;
+  --amber: #ffbf47;
+  --coral: #ff6f61;
+  --green: #159963;
+  --shadow: 0 18px 45px rgba(19, 38, 74, 0.15);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at 15% 10%, rgba(19, 213, 178, 0.28), transparent 28%),
+    radial-gradient(circle at 80% 0%, rgba(255, 191, 71, 0.24), transparent 30%),
+    linear-gradient(140deg, #eef8ff 0%, #f7f3ff 48%, #fff8ea 100%);
+}
+
+button {
+  border: 0;
+  font: inherit;
+}
+
+.app-shell {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px 12px;
+}
+
+.phone-frame {
+  position: relative;
+  width: min(100%, 430px);
+  height: min(900px, calc(100vh - 28px));
+  min-height: 720px;
+  overflow: hidden;
+  background: rgba(246, 249, 255, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.74);
+  border-radius: 34px;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(20px);
+}
+
+.top-bar {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 18px 20px 12px;
+  background: rgba(251, 252, 255, 0.86);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.68);
+  backdrop-filter: blur(14px);
+}
+
+.top-bar-left {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+  min-width: 0;
+}
+
+.eyebrow {
+  flex: 0 0 100%;
+  margin: 0;
+  color: var(--blue);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin-top: 0;
+}
+
+h1 {
+  margin-bottom: 0;
+  font-size: 24px;
+  line-height: 1.05;
+}
+
+#screen-meta {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  max-width: 100%;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(49, 87, 255, 0.08);
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.top-bar-left .habit-link {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+#screen-meta {
+  border: 0;
+  cursor: pointer;
+  text-align: left;
+  white-space: nowrap;
+}
+
+#screen-meta:hover {
+  color: var(--blue);
+}
+
+.icon-button,
+.nav-item,
+.coach-action,
+.chip,
+.cta,
+.choice-button {
+  cursor: pointer;
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    background 160ms ease;
+}
+
+.icon-button:active,
+.nav-item:active,
+.coach-action:active,
+.chip:active,
+.cta:active,
+.choice-button:active {
+  transform: scale(0.98);
+}
+
+.icon-button {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.screen {
+  height: calc(100% - 94px);
+  overflow-y: auto;
+  padding: 12px 16px 96px;
+  scroll-behavior: smooth;
+}
+
+.screen::-webkit-scrollbar {
+  width: 0;
+}
+
+.coach-hero {
+  position: relative;
+  overflow: hidden;
+  padding: 20px;
+  min-height: 290px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  color: #fff;
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at 82% 16%, rgba(255, 191, 71, 0.95), transparent 26%),
+    radial-gradient(circle at 15% 5%, rgba(19, 213, 178, 0.75), transparent 28%),
+    linear-gradient(145deg, #17234d 0%, #2759d8 48%, #6937d2 100%);
+  box-shadow: 0 18px 36px rgba(38, 72, 173, 0.28);
+}
+
+.coach-hero.stable {
+  background:
+    radial-gradient(circle at 82% 16%, rgba(34, 197, 94, 0.58), transparent 26%),
+    radial-gradient(circle at 15% 5%, rgba(14, 165, 233, 0.58), transparent 28%),
+    linear-gradient(145deg, #14325f 0%, #2456c8 52%, #1f8a62 100%);
+}
+
+.coach-hero.watching {
+  background:
+    radial-gradient(circle at 82% 16%, rgba(250, 204, 21, 0.82), transparent 26%),
+    radial-gradient(circle at 15% 5%, rgba(14, 165, 233, 0.55), transparent 28%),
+    linear-gradient(145deg, #4b3d14 0%, #b77a13 52%, #1e6491 100%);
+}
+
+.coach-hero.critical {
+  background:
+    radial-gradient(circle at 82% 16%, rgba(239, 68, 68, 0.88), transparent 26%),
+    radial-gradient(circle at 15% 5%, rgba(250, 204, 21, 0.48), transparent 28%),
+    linear-gradient(145deg, #5a1717 0%, #b42318 48%, #6d1f7c 100%);
+}
+
+.coach-hero.fraud {
+  background:
+    radial-gradient(circle at 82% 16%, rgba(239, 68, 68, 0.92), transparent 26%),
+    radial-gradient(circle at 15% 5%, rgba(249, 115, 22, 0.5), transparent 28%),
+    linear-gradient(145deg, #3b1020 0%, #8b1735 52%, #6823a8 100%);
+}
+
+.coach-hero.overdraft {
+  background:
+    radial-gradient(circle at 82% 16%, rgba(249, 115, 22, 0.92), transparent 26%),
+    radial-gradient(circle at 15% 5%, rgba(250, 204, 21, 0.52), transparent 28%),
+    linear-gradient(145deg, #4d2410 0%, #b94e12 52%, #6f2b8e 100%);
+}
+
+.coach-hero::after {
+  content: "";
+  position: absolute;
+  inset: auto -70px -120px auto;
+  width: 240px;
+  height: 240px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.13);
+}
+
+.hero-top,
+.hero-actions {
+  position: relative;
+  z-index: 1;
+}
+
+.state-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  padding: 9px 12px;
+  border-radius: 999px;
+  color: #ecfffb;
+  background: rgba(255, 255, 255, 0.14);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.state-pill.stable {
+  background: rgba(34, 197, 94, 0.2);
+}
+
+.state-pill.watching {
+  background: rgba(250, 204, 21, 0.24);
+  color: #fff8d1;
+}
+
+.state-pill.critical {
+  background: rgba(239, 68, 68, 0.28);
+}
+
+.state-pill.fraud {
+  background: rgba(239, 68, 68, 0.34);
+}
+
+.state-pill.overdraft {
+  background: rgba(249, 115, 22, 0.34);
+}
+
+.state-dot {
+  width: 9px;
+  height: 9px;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: var(--teal);
+  box-shadow: 0 0 0 5px rgba(19, 213, 178, 0.15);
+}
+
+.state-pill.critical .state-dot,
+.coach-hero.critical .state-dot {
+  background: var(--coral);
+  box-shadow: 0 0 0 5px rgba(255, 111, 97, 0.18);
+}
+
+.state-pill.fraud .state-dot,
+.coach-hero.fraud .state-dot {
+  background: #ff9db1;
+  box-shadow: 0 0 0 5px rgba(255, 157, 177, 0.16);
+}
+
+.state-pill.overdraft .state-dot,
+.coach-hero.overdraft .state-dot {
+  background: #ffd27d;
+  box-shadow: 0 0 0 5px rgba(255, 210, 125, 0.18);
+}
+
+.state-pill.watching .state-dot {
+  background: #ffe36b;
+  box-shadow: 0 0 0 5px rgba(255, 227, 107, 0.15);
+}
+
+.state-pill.stable .state-dot {
+  background: #86efac;
+  box-shadow: 0 0 0 5px rgba(134, 239, 172, 0.15);
+}
+
+.hero-title {
+  margin: 18px 0 10px;
+  max-width: 310px;
+  font-size: 29px;
+  line-height: 1.05;
+}
+
+.top-meta {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--muted);
+}
+
+.hero-copy {
+  max-width: 320px;
+  margin-bottom: 18px;
+  color: rgba(255, 255, 255, 0.82);
+  line-height: 1.45;
+}
+
+.hero-copy-link {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.hero-copy-link:hover,
+.hero-copy-link:focus-visible {
+  color: #fff;
+}
+
+.habit-band {
+  display: grid;
+  gap: 10px;
+}
+
+.habit-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.habit-item {
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.84);
+  padding: 12px 13px;
+  display: grid;
+  gap: 4px;
+}
+
+.habit-item span {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.habit-item strong {
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+.habit-item p {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--muted);
+}
+
+.safe-spend {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.dial {
+  width: 92px;
+  height: 92px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background:
+    conic-gradient(from 230deg, var(--coral) 0deg, var(--amber) 86deg, var(--teal) 180deg, rgba(255, 255, 255, 0.22) 181deg),
+    rgba(255, 255, 255, 0.12);
+}
+
+.dial-inner {
+  width: 68px;
+  height: 68px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.94);
+  color: var(--green);
+  font-size: 24px;
+  font-weight: 900;
+}
+
+.safe-label {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.safe-detail {
+  margin: 4px 0 0;
+  color: #fff;
+  font-weight: 750;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  scroll-snap-type: x proximity;
+}
+
+.coach-action {
+  flex: 0 0 auto;
+  min-width: 128px;
+  min-height: 42px;
+  padding: 10px 12px;
+  color: #05271f;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #b8ffe7, #43e5bd);
+  font-weight: 800;
+  font-size: 12px;
+  text-align: left;
+  box-shadow: 0 10px 20px rgba(5, 46, 38, 0.18);
+}
+
+.action-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin: 8px 0;
+}
+
+.chip {
+  min-height: 54px;
+  display: grid;
+  place-items: center;
+  gap: 3px;
+  padding: 8px 4px;
+  color: var(--ink);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.74);
+  box-shadow: inset 0 0 0 1px var(--line);
+  font-size: 11px;
+  font-weight: 850;
+}
+
+.chip span:first-child,
+.nav-item span:first-child {
+  font-size: 22px;
+}
+
+.chip svg {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
+.chip span:first-child {
+  display: grid;
+  place-items: center;
+}
+
+.section-title {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 14px 2px 8px;
+}
+
+.section-title h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.section-title p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.card-stack {
+  display: grid;
+  gap: 10px;
+}
+
+.horizontal-rail,
+.coaching-rail {
+  display: flex;
+  gap: 10px;
+  margin-inline: -16px;
+  overflow-x: auto;
+  padding: 0 16px 8px;
+  scroll-padding-inline: 16px;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.horizontal-rail::-webkit-scrollbar,
+.coaching-rail::-webkit-scrollbar,
+.hero-actions::-webkit-scrollbar {
+  display: none;
+}
+
+.context-card,
+.section-card,
+.list-card,
+.workflow-card,
+.settings-card {
+  border-radius: 22px;
+  background: var(--panel);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.86), 0 8px 22px rgba(33, 45, 72, 0.08);
+  backdrop-filter: blur(18px);
+}
+
+.context-card {
+  flex: 0 0 46%;
+  scroll-snap-align: start;
+  display: grid;
+  grid-template-columns: 42px 1fr;
+  align-items: center;
+  gap: 10px;
+  width: auto;
+  min-height: 116px;
+  padding: 12px;
+  text-align: left;
+  color: var(--ink);
+}
+
+.card-icon {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(49, 87, 255, 0.15), rgba(19, 213, 178, 0.2));
+  font-size: 23px;
+}
+
+.card-type {
+  margin: 0 0 3px;
+  color: var(--blue);
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.context-card h3,
+.list-card h3,
+.workflow-card h3 {
+  margin: 0 0 4px;
+  font-size: 15px;
+  line-height: 1.2;
+}
+
+.context-card p,
+.list-card p,
+.workflow-card p,
+.settings-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.arrow {
+  display: none;
+  color: var(--muted);
+  font-size: 22px;
+}
+
+.section-card {
+  flex: 0 0 86%;
+  scroll-snap-align: start;
+  padding: 15px;
+}
+
+.section-card + .section-card {
+  margin-top: 0;
+}
+
+.list-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+}
+
+.list-item:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.list-item strong {
+  display: block;
+  margin-bottom: 3px;
+}
+
+.list-item small {
+  display: block;
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+.impact,
+.status-badge {
+  white-space: nowrap;
+  padding: 7px 9px;
+  border-radius: 999px;
+  color: #064c3e;
+  background: rgba(19, 213, 178, 0.18);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.attention {
+  color: #76510b;
+  background: rgba(255, 191, 71, 0.24);
+}
+
+.pressure {
+  color: #8b2e25;
+  background: rgba(255, 111, 97, 0.15);
+}
+
+.cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  margin-top: 10px;
+  padding: 10px 14px;
+  border-radius: 15px;
+  color: #fff;
+  background: linear-gradient(135deg, var(--blue), var(--violet));
+  font-weight: 850;
+}
+
+.cta.secondary {
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.screen-heading {
+  margin: 2px 2px 14px;
+}
+
+.screen-heading p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.nav-item svg,
+.icon-button svg {
+  width: 22px;
+  height: 22px;
+  display: block;
+}
+
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.metric {
+  padding: 15px;
+  border-radius: 20px;
+  background: var(--panel-strong);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.metric span {
+  display: block;
+  margin-bottom: 7px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.metric strong {
+  font-size: 24px;
+}
+
+.list-card,
+.workflow-card,
+.settings-card {
+  padding: 15px;
+  margin-bottom: 10px;
+}
+
+.progress-track {
+  height: 10px;
+  overflow: hidden;
+  margin-top: 10px;
+  border-radius: 999px;
+  background: rgba(18, 24, 38, 0.08);
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--teal), var(--blue));
+}
+
+.insight-hero {
+  display: grid;
+  gap: 14px;
+}
+
+.insight-hero-copy h2 {
+  margin: 6px 0 8px;
+  font-size: 22px;
+  line-height: 1.15;
+}
+
+.insight-hero-copy p:last-child {
+  color: var(--muted);
+}
+
+.insight-gauge {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(49, 87, 255, 0.07), rgba(19, 213, 178, 0.12));
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.gauge-label {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.gauge-value {
+  color: var(--ink);
+  font-size: 30px;
+  font-weight: 950;
+  line-height: 1;
+}
+
+.gauge-track {
+  height: 10px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(18, 24, 38, 0.08);
+}
+
+.gauge-track span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--amber), var(--coral));
+}
+
+.insight-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.insight-card {
+  position: relative;
+  display: grid;
+  gap: 10px;
+  padding: 15px;
+  border-radius: 20px;
+  background: var(--panel-strong);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.insight-card strong {
+  display: block;
+  font-size: 16px;
+  line-height: 1.25;
+}
+
+.insight-card p {
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.insight-badge {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 7px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.insight-badge.warning {
+  color: #7b4f08;
+  background: rgba(255, 191, 71, 0.22);
+}
+
+.insight-badge.info {
+  color: #0c4d78;
+  background: rgba(14, 165, 233, 0.16);
+}
+
+.insight-badge.danger {
+  color: #8b2e25;
+  background: rgba(239, 68, 68, 0.13);
+}
+
+.insight-bars {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: end;
+  gap: 8px;
+  min-height: 76px;
+  padding: 10px 6px 2px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(18, 24, 38, 0.03), rgba(18, 24, 38, 0.01));
+}
+
+.insight-bars span {
+  display: block;
+  border-radius: 999px 999px 4px 4px;
+  background: linear-gradient(180deg, var(--teal), var(--blue));
+}
+
+.mini-donut {
+  position: relative;
+  width: 100%;
+  max-width: 152px;
+  aspect-ratio: 1;
+  margin: 0 auto;
+  border-radius: 50%;
+  background:
+    conic-gradient(from 240deg, var(--coral), var(--green), var(--blue), rgba(18, 24, 38, 0.08) 0);
+}
+
+.mini-donut::after {
+  content: "";
+  position: absolute;
+  inset: 14px;
+  border-radius: inherit;
+  background: var(--panel-strong);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.mini-donut span {
+  position: absolute;
+  inset: 24px;
+  z-index: 1;
+  border-radius: inherit;
+  background: conic-gradient(from 240deg, var(--coral) 0 calc(var(--value) * 3.6deg), rgba(18, 24, 38, 0.08) 0);
+}
+
+.insight-score {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.insight-score div {
+  padding: 12px;
+  border-radius: 16px;
+  background: rgba(18, 24, 38, 0.03);
+}
+
+.insight-score span {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.insight-score strong {
+  font-size: 20px;
+}
+
+.workflow-choices {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.choice-button {
+  width: 100%;
+  padding: 14px;
+  border-radius: 16px;
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: inset 0 0 0 1px var(--line);
+  text-align: left;
+  font-weight: 850;
+}
+
+.success-panel {
+  padding: 18px;
+  border-radius: 24px;
+  color: #063e33;
+  background: linear-gradient(135deg, rgba(19, 213, 178, 0.24), rgba(255, 255, 255, 0.74));
+}
+
+.bottom-nav {
+  position: absolute;
+  z-index: 4;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  padding: 7px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 12px 30px rgba(23, 36, 65, 0.16);
+  backdrop-filter: blur(20px);
+}
+
+.nav-item {
+  display: grid;
+  place-items: center;
+  gap: 2px;
+  min-height: 58px;
+  border-radius: 18px;
+  color: var(--muted);
+  background: transparent;
+  font-size: 11px;
+  font-weight: 850;
+}
+
+.nav-item.active {
+  color: #052d26;
+  background: rgba(19, 213, 178, 0.18);
+}
+
+@media (max-width: 460px) {
+  .app-shell {
+    padding: 0;
+  }
+
+  .phone-frame {
+    width: 100%;
+    height: 100vh;
+    min-height: 100vh;
+    border-radius: 0;
+  }
+
+  .coach-hero {
+    min-height: 285px;
+  }
+
+  .hero-title {
+    font-size: 27px;
+  }
+}
+
+/* Current prototype additions: original soft styling plus visual dynamic cards */
+.coach-hero {
+  cursor: pointer;
+}
+
+.ask-action {
+  background: linear-gradient(135deg, #d7ffef, #67e8bd);
+}
+
+.context-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.context-rail {
+  display: flex;
+  gap: 10px;
+  margin-inline: -16px;
+  padding: 0 16px 8px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.context-rail::-webkit-scrollbar {
+  display: none;
+}
+
+.context-rail .context-card {
+  flex: 0 0 46%;
+  min-height: 168px;
+  scroll-snap-align: start;
+}
+
+.visual-card {
+  min-height: 156px;
+  grid-template-columns: 1fr;
+  align-content: space-between;
+  gap: 8px;
+  padding: 12px;
+  overflow: hidden;
+}
+
+.visual-card .card-visual {
+  min-height: 64px;
+  display: grid;
+  place-items: center;
+}
+
+.visual-card .card-copy {
+  display: block;
+}
+
+.pin-toggle,
+.card-pin-button {
+  position: absolute;
+  z-index: 2;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+}
+
+.pin-toggle {
+  top: 10px;
+  right: 10px;
+  border: 0;
+  padding: 4px 7px;
+  color: #0f172a;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 4px 10px rgba(17, 24, 39, 0.08);
+  cursor: pointer;
+}
+
+.pin-toggle.is-pinned {
+  color: #064e3b;
+  background: rgba(215, 255, 239, 0.96);
+}
+
+.visual-card h3 {
+  font-size: 14px;
+}
+
+.visual-card strong {
+  display: block;
+  margin-bottom: 3px;
+  color: var(--ink);
+  font-size: 18px;
+  line-height: 1;
+}
+
+.visual-card p {
+  font-size: 12px;
+}
+
+.mini-gauge {
+  position: relative;
+  width: 112px;
+  height: 58px;
+  display: grid;
+  place-items: end center;
+  overflow: hidden;
+  border-radius: 112px 112px 0 0;
+  background:
+    conic-gradient(from 235deg at 50% 100%, var(--coral) 0deg, var(--amber) 55deg, var(--teal) 112deg, rgba(18, 24, 38, 0.08) 113deg 180deg);
+}
+
+.mini-gauge::after {
+  content: "";
+  position: absolute;
+  inset: 16px 18px 0;
+  border-radius: 80px 80px 0 0;
+  background: rgba(255, 255, 255, 0.96);
+}
+
+.gauge-needle {
+  position: absolute;
+  right: 23px;
+  bottom: 10px;
+  z-index: 1;
+  width: 34px;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--ink);
+  transform: rotate(-52deg);
+  transform-origin: 4px 50%;
+}
+
+.gauge-value {
+  position: relative;
+  z-index: 2;
+  margin-bottom: 8px;
+  color: var(--green);
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.briefing-art,
+.target-art,
+.clock-art,
+.momentum-art {
+  position: relative;
+  width: 76px;
+  height: 64px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(49, 87, 255, 0.12), rgba(19, 213, 178, 0.18));
+}
+
+.briefing-art::before {
+  content: "";
+  position: absolute;
+  left: 15px;
+  top: 20px;
+  width: 42px;
+  height: 28px;
+  border-radius: 7px;
+  background: linear-gradient(135deg, #2f7ecb, #84d9ff);
+  box-shadow: inset 0 -8px 0 rgba(255, 191, 71, 0.65);
+}
+
+.sun-dot {
+  position: absolute;
+  right: 13px;
+  top: 12px;
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: var(--amber);
+  box-shadow: 0 0 0 6px rgba(255, 191, 71, 0.18);
+}
+
+.note-lines {
+  position: absolute;
+  left: 20px;
+  top: 26px;
+  width: 25px;
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 8px 0 rgba(255, 255, 255, 0.7);
+}
+
+.target-art {
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, rgba(255, 111, 97, 0.13), rgba(255, 255, 255, 0.9));
+}
+
+.target-art::before,
+.target-art::after,
+.target-art span {
+  content: "";
+  position: absolute;
+  border-radius: 999px;
+  border: 3px solid var(--coral);
+}
+
+.target-art::before {
+  width: 48px;
+  height: 48px;
+}
+
+.target-art::after {
+  width: 28px;
+  height: 28px;
+  border-color: var(--blue);
+}
+
+.target-art span {
+  width: 9px;
+  height: 9px;
+  border: 0;
+  background: var(--coral);
+}
+
+.clock-art {
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, rgba(49, 87, 255, 0.1), rgba(255, 255, 255, 0.95));
+}
+
+.clock-art::before {
+  content: "";
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  border: 4px solid #84c5ee;
+  background: #fff;
+}
+
+.clock-art::after {
+  content: "";
+  position: absolute;
+  width: 4px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--ink);
+  transform: translateY(-5px) rotate(0deg);
+  transform-origin: 50% 90%;
+  animation: clockTick 4s linear infinite;
+}
+
+.clock-art span {
+  position: absolute;
+  width: 18px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--blue);
+  transform: translateX(8px);
+}
+
+.momentum-art {
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, rgba(255, 191, 71, 0.18), rgba(19, 213, 178, 0.18));
+}
+
+.momentum-art::before {
+  content: "";
+  width: 38px;
+  height: 48px;
+  border-radius: 50% 50% 45% 45%;
+  background: radial-gradient(circle at 50% 75%, #fff 0 8px, transparent 9px), linear-gradient(180deg, var(--amber), var(--coral));
+  animation: pulseWin 1.8s ease-in-out infinite;
+}
+
+@keyframes clockTick {
+  to {
+    transform: translateY(-5px) rotate(360deg);
+  }
+}
+
+@keyframes pulseWin {
+  50% {
+    transform: translateY(-3px) scale(1.05);
+  }
+}
+
+.coach-chat-summary {
+  padding: 15px;
+  margin-bottom: 12px;
+  border-radius: 22px;
+  background: var(--panel);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.86), 0 8px 22px rgba(33, 45, 72, 0.08);
+}
+
+.quick-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.coach-thread {
+  display: grid;
+  gap: 10px;
+  margin: 12px 0;
+}
+
+.coach-bubble {
+  width: fit-content;
+  max-width: 88%;
+  padding: 12px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.coach-bubble p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.user-bubble {
+  justify-self: end;
+  background: rgba(215, 255, 239, 0.9);
+}
+
+.coach-prompt {
+  position: sticky;
+  bottom: 0;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  padding: 10px 0;
+  background: rgba(246, 249, 255, 0.92);
+}
+
+.coach-prompt input {
+  min-width: 0;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--ink);
+  background: #fff;
+  font: inherit;
+}
+
+.coach-prompt button {
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 999px;
+  color: #05271f;
+  background: linear-gradient(135deg, #b8ffe7, #43e5bd);
+  font-weight: 850;
+}
+
+.hero-prompt {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 8px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.14);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+}
+
+.hero-prompt input {
+  min-width: 0;
+  height: 42px;
+  border: 0;
+  border-radius: 14px;
+  padding: 0 12px;
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.94);
+  font: inherit;
+  font-size: 13px;
+}
+
+.hero-prompt button {
+  min-height: 42px;
+  padding: 0 14px;
+  border-radius: 14px;
+  color: #05271f;
+  background: linear-gradient(135deg, #b8ffe7, #43e5bd);
+  font-weight: 900;
+}
+
+.sponsored-title {
+  margin-top: 16px;
+}
+
+.sponsor-rail {
+  display: flex;
+  gap: 10px;
+  margin-inline: -16px;
+  overflow-x: auto;
+  padding: 0 16px 8px;
+  scroll-padding-inline: 16px;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.sponsor-rail::-webkit-scrollbar {
+  display: none;
+}
+
+.sponsor-card {
+  position: relative;
+  flex: 0 0 76%;
+  min-height: 132px;
+  overflow: hidden;
+  padding: 14px;
+  border-radius: 22px;
+  color: var(--ink);
+  text-align: left;
+  background:
+    radial-gradient(circle at 88% 16%, rgba(255, 255, 255, 0.9) 0 18px, transparent 19px),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(235, 250, 255, 0.92));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.92), 0 12px 26px rgba(33, 45, 72, 0.1);
+  scroll-snap-align: start;
+}
+
+.sponsor-card::before {
+  content: "";
+  position: absolute;
+  right: -34px;
+  bottom: -42px;
+  width: 128px;
+  height: 128px;
+  border-radius: 999px;
+  background: rgba(19, 213, 178, 0.18);
+}
+
+.sponsor-card::after {
+  content: "";
+  position: absolute;
+  inset: auto 16px 44px 16px;
+  height: 1px;
+  background-image: linear-gradient(90deg, rgba(18, 24, 38, 0.12) 50%, transparent 0);
+  background-size: 10px 1px;
+}
+
+.sponsor-card.blue::before {
+  background: rgba(49, 87, 255, 0.16);
+}
+
+.sponsor-card.amber::before {
+  background: rgba(255, 191, 71, 0.25);
+}
+
+.sponsor-label {
+  display: inline-flex;
+  width: fit-content;
+  margin-bottom: 6px;
+  padding: 5px 8px;
+  border-radius: 999px;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.68);
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.sponsor-brand {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--blue);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.sponsor-card strong {
+  position: relative;
+  z-index: 1;
+  display: block;
+  max-width: 220px;
+  color: var(--ink);
+  font-size: 19px;
+  line-height: 1.05;
+}
+
+.sponsor-copy {
+  position: relative;
+  z-index: 1;
+  display: block;
+  max-width: 230px;
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.3;
+}
+
+.coupon-row {
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: 10px;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.coupon-row span:first-child,
+.coupon-code {
+  padding: 7px 9px;
+  border-radius: 12px;
+  color: #05271f;
+  background: rgba(184, 255, 231, 0.9);
+  font-size: 12px;
+  font-weight: 950;
+  letter-spacing: 0.04em;
+}
+
+.hidden-savings-hero {
+  position: relative;
+  overflow: hidden;
+  padding: 18px;
+  margin-bottom: 12px;
+  border-radius: 24px;
+  color: #fff;
+  background:
+    radial-gradient(circle at 85% 12%, rgba(255, 191, 71, 0.7), transparent 28%),
+    linear-gradient(145deg, #17234d, #2568aa 54%, #159963 130%);
+  box-shadow: 0 18px 36px rgba(38, 72, 173, 0.22);
+}
+
+.hidden-savings-hero h3 {
+  margin: 2px 0 6px;
+  color: #fff;
+  font-size: 44px;
+  line-height: 1;
+}
+
+.hidden-savings-hero p {
+  max-width: 300px;
+  color: rgba(255, 255, 255, 0.84);
+}
+
+.hidden-savings-hero .card-type {
+  color: #d7ffef;
+}
+
+.savings-scan-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.savings-scan-item strong {
+  color: var(--green);
+  font-size: 20px;
+}
+
+.savings-scan-item .cta {
+  grid-column: 1 / -1;
+  justify-self: start;
+  margin-top: 4px;
+}
+
+/* Survey-informed variant overrides */
+.hero-prompt {
+  display: none;
+}
+
+.hero-chat-hint {
+  position: relative;
+  z-index: 2;
+  margin-top: 10px;
+  padding: 9px 11px;
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.13);
+  font-size: 12px;
+  font-weight: 750;
+  text-align: center;
+}
+
+.briefing-art,
+.target-art,
+.clock-art,
+.momentum-art,
+.spark-art,
+.save-art,
+.credit-art {
+  position: relative;
+  width: 76px;
+  height: 64px;
+  border-radius: 18px;
+}
+
+.spark-art,
+.save-art,
+.credit-art {
+  display: grid;
+  place-items: center;
+}
+
+.spark-art {
+  background: linear-gradient(135deg, rgba(255, 191, 71, 0.26), rgba(19, 213, 178, 0.2));
+}
+
+.spark-art::before {
+  content: "$";
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  color: #064c3e;
+  background: linear-gradient(135deg, #d7ffef, #43e5bd);
+  font-size: 28px;
+  font-weight: 950;
+  animation: pulseWin 1.8s ease-in-out infinite;
+}
+
+.save-art {
+  background: linear-gradient(135deg, rgba(19, 213, 178, 0.18), rgba(255, 255, 255, 0.92));
+}
+
+.save-art::before {
+  content: "";
+  width: 48px;
+  height: 38px;
+  border-radius: 12px 12px 16px 16px;
+  background: linear-gradient(135deg, #43e5bd, #159963);
+  box-shadow: inset 0 10px 0 rgba(255, 255, 255, 0.22);
+}
+
+.save-art::after {
+  content: "";
+  position: absolute;
+  top: 16px;
+  width: 30px;
+  height: 7px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.credit-art {
+  background: linear-gradient(135deg, rgba(49, 87, 255, 0.12), rgba(255, 255, 255, 0.92));
+}
+
+.credit-art::before {
+  content: "";
+  width: 52px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #3157ff, #84c5ee);
+  box-shadow: inset 0 -10px 0 rgba(255, 255, 255, 0.2);
+}
+
+.credit-art::after {
+  content: "";
+  position: absolute;
+  width: 30px;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.8);
+  transform: translateY(8px);
+}
+
+.sponsor-card {
+  flex-basis: 84%;
+  min-height: 168px;
+  padding: 16px;
+}
+
+.sponsor-card::after {
+  inset: auto 16px 48px 16px;
+}
+
+.sponsor-label {
+  margin-bottom: 8px;
+}
+
+.sponsor-brand {
+  margin-bottom: 5px;
+}
+
+.sponsor-card strong {
+  max-width: 250px;
+  font-size: 22px;
+}
+
+.sponsor-copy {
+  max-width: 240px;
+  margin-top: 7px;
+  font-size: 13px;
+}
+
+.coupon-row {
+  bottom: 12px;
+}
+
+.coupon-row span:first-child {
+  padding: 8px 10px;
+  font-size: 11px;
+  letter-spacing: 0;
+}
+
+.coupon-row span:last-child {
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.coupon-detail {
+  padding: 18px;
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(255, 191, 71, 0.24), transparent 30%),
+    rgba(255, 255, 255, 0.82);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.9), 0 10px 26px rgba(33, 45, 72, 0.1);
+}
+
+.coupon-detail h3 {
+  margin-bottom: 8px;
+}
+
+.coupon-detail p {
+  color: var(--muted);
+}
+
+.coupon-code {
+  display: inline-flex;
+  margin: 10px 0 4px;
+}
+
+.hero-strategy-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.strategy-action {
+  min-height: 36px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+}
+
+.scenario-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.scenario-chip {
+  padding: 12px 12px 10px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: #fff;
+  text-align: left;
+  box-shadow: 0 6px 16px rgba(17, 24, 39, 0.04);
+}
+
+.scenario-chip strong {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--ink);
+  font-size: 13px;
+}
+
+.scenario-chip span {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.3;
+}
+
+.scenario-chip.active {
+  border-color: rgba(22, 163, 74, 0.35);
+  background: rgba(215, 255, 239, 0.74);
+}
+
+.onboarding-shell {
+  display: grid;
+  gap: 14px;
+  padding: 6px 2px 0;
+}
+
+.onboarding-badge {
+  width: fit-content;
+  padding: 7px 10px;
+  border-radius: 999px;
+  color: #0d4b38;
+  background: rgba(215, 255, 239, 0.92);
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.onboarding-shell h2 {
+  margin: 0;
+  font-size: 26px;
+  line-height: 1.1;
+}
+
+.onboarding-shell p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.onboarding-progress {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.onboarding-progress span {
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(18, 24, 38, 0.08);
+}
+
+.onboarding-progress span.active {
+  background: linear-gradient(90deg, var(--teal), var(--blue));
+}
+
+.onboarding-choice.selected {
+  border-color: rgba(49, 87, 255, 0.35);
+  background: rgba(49, 87, 255, 0.08);
+}
+
+.onboarding-field {
+  display: grid;
+  gap: 6px;
+  width: 100%;
+  padding: 12px;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.onboarding-field span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.onboarding-field input,
+.onboarding-field select {
+  width: 100%;
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  font: inherit;
+  color: var(--ink);
+  background: #fff;
+}
+
+.onboarding-note {
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.onboarding-note strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 13px;
+}
+
+.alert-stack,
+.notification-tray {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.alert-card,
+.phone-notification {
+  padding: 14px;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.alert-card {
+  display: grid;
+  gap: 10px;
+}
+
+.alert-card h3,
+.phone-notification strong {
+  margin: 0 0 4px;
+  font-size: 15px;
+}
+
+.alert-card p,
+.phone-notification p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.alert-card.critical {
+  background: rgba(254, 242, 242, 0.96);
+  box-shadow: inset 0 0 0 1px rgba(239, 68, 68, 0.18);
+}
+
+.alert-card.warning,
+.phone-notification.warning {
+  background: rgba(255, 251, 235, 0.96);
+  box-shadow: inset 0 0 0 1px rgba(250, 204, 21, 0.2);
+}
+
+.alert-card.info,
+.phone-notification.info {
+  background: rgba(239, 246, 255, 0.96);
+  box-shadow: inset 0 0 0 1px rgba(14, 165, 233, 0.18);
+}
+
+.phone-notification {
+  display: grid;
+  gap: 8px;
+}
+
+.phone-notification.critical {
+  background: linear-gradient(180deg, rgba(254, 242, 242, 1), rgba(255, 255, 255, 0.95));
+  box-shadow: inset 0 0 0 1px rgba(239, 68, 68, 0.22);
+}
+
+.phone-os-shell {
+  display: grid;
+  gap: 14px;
+}
+
+.phone-os-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.phone-os-top h2 {
+  margin: 4px 0 0;
+  font-size: 22px;
+  line-height: 1.15;
+}
+
+.reminder-view {
+  display: grid;
+  gap: 12px;
+}
+
+.compact-tray {
+  gap: 8px;
+}
+
+.mini-calendar {
+  display: grid;
+  gap: 10px;
+}
+
+.mini-calendar-item {
+  display: grid;
+  gap: 4px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.mini-calendar-day {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+</style>
+  </head>
+  <body>
+    <main class="app-shell" aria-label="FinCoach prototype">
+      <section class="phone-frame">
+        <header class="top-bar">
+          <div class="top-bar-left">
+            <p class="eyebrow">FinCoach</p>
+            <h1 id="screen-title">Overview</h1>
+            <button id="screen-meta" class="top-meta" type="button" data-route="habits"></button>
+          </div>
+          <button class="icon-button" type="button" data-route="settings" aria-label="Open settings">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7ZM4 13.2v-2.4l2.1-.6c.1-.4.3-.8.5-1.2L5.6 6.9l1.7-1.7 2.1 1c.4-.2.8-.4 1.2-.5L11.2 4h2.4l.6 2.1c.4.1.8.3 1.2.5l2.1-1 1.7 1.7-1 2.1c.2.4.4.8.5 1.2l2.1.6v2.4l-2.1.6c-.1.4-.3.8-.5 1.2l1 2.1-1.7 1.7-2.1-1c-.4.2-.8.4-1.2.5L13.2 20h-2.4l-.6-2.1c-.4-.1-.8-.3-1.2-.5l-2.1 1-1.7-1.7 1-2.1c-.2-.4-.4-.8-.5-1.2z" fill="currentColor"/></svg>
+          </button>
+        </header>
+
+        <section id="app" class="screen" aria-live="polite">
+          <article class="section-card">
+            <h2>Loading FinCoach</h2>
+            <p>If this message stays on screen, refresh once or open the launcher file.</p>
+          </article>
+        </section>
+
+        <nav class="bottom-nav" aria-label="Primary navigation">
+          <button class="nav-item active" type="button" data-route="home">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 11.5 12 4l9 7.5v8.5a1 1 0 0 1-1 1h-5.5v-6h-5v6H4a1 1 0 0 1-1-1z" fill="currentColor"/></svg>
+            <span>Home</span>
+          </button>
+          <button class="nav-item" type="button" data-route="budgets">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 5h16v14H4z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M7 9h10M7 13h10M7 17h7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            <span>Budgets</span>
+          </button>
+          <button class="nav-item" type="button" data-route="accounts">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9ZM5 21a7 7 0 0 1 14 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            <span>Accounts</span>
+          </button>
+          <button class="nav-item" type="button" data-route="insights">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 19V5M5 19h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M8 14l3-3 3 2 5-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span>Insights</span>
+          </button>
+        </nav>
+      </section>
+    </main>
+
+    <script>
+const user = {
+  id: "u_001",
+  name: "User",
+  preferredName: "User",
+  lastActiveAt: "2026-05-15T08:45:00",
+};
+
+const state = {
+  route: "home",
+  lastRoute: "home",
+  onboardingComplete: false,
+  onboardingStep: 0,
+  authState: "signed_out",
+  userProfile: {
+    displayName: "",
+    incomeType: "salary",
+    incomeTiming: "weekly",
+    goalPriority: "buffer",
+    budgetStyle: "manual",
+    paycheckDay: "Friday",
+    monthlyIncome: 2800,
+    monthlyEssentials: 2100,
+  },
+  completedActions: [],
+  transferApplied: false,
+  pinnedCardIds: ["bill-pressure", "hidden-savings"],
+  demoScenario: "auto",
+  budgetEditId: null,
+  budgetDraft: {
+    name: "",
+    spent: 0,
+    target: 0,
+  },
+  goalEditId: null,
+  goalDraft: {
+    name: "",
+    currentAmount: 0,
+    targetAmount: 0,
+  },
+  adminState: {
+    userSearch: "",
+    selectedTab: "overview",
+    forceMfa: true,
+    alertsEnabled: true,
+    payoutHold: false,
+  },
+  billReminderView: "compact",
+  habitState: {
+    lastSeenDate: "",
+    appCheckInStreak: 0,
+  },
+  notificationPrefs: {
+    permission: "allowed",
+    channels: {
+      balance: true,
+      spending: true,
+      fraud: true,
+      coupons: true,
+      goals: true,
+    },
+  },
+  coachMessages: [
+    {
+      from: "coach",
+      text: "Ask me what matters now, why I recommended an action, or which lesson can help.",
+    },
+  ],
+  wins: [
+    { id: "w1", title: "Reviewed Friday rent", date: "May 14", source: "money move" },
+    { id: "w2", title: "Skipped impulse lunch order", date: "May 13", source: "manual" },
+    { id: "w3", title: "Moved spare buffer to savings", date: "May 12", source: "money move" },
+  ],
+};
+
+const STORAGE_KEY = "fincoach-prototype-state-v2";
+
+function loadSavedState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const saved = JSON.parse(raw);
+    if (saved && typeof saved === "object") {
+      if (typeof saved.onboardingComplete === "boolean") state.onboardingComplete = saved.onboardingComplete;
+      if (typeof saved.onboardingStep === "number") state.onboardingStep = saved.onboardingStep;
+      if (typeof saved.route === "string") state.route = saved.route;
+      if (typeof saved.lastRoute === "string") state.lastRoute = saved.lastRoute;
+      if (saved.userProfile && typeof saved.userProfile === "object") {
+        state.userProfile = { ...state.userProfile, ...saved.userProfile };
+      }
+      user.preferredName = state.userProfile.displayName || user.preferredName;
+      if (Array.isArray(saved.completedActions)) state.completedActions = saved.completedActions;
+      if (typeof saved.transferApplied === "boolean") state.transferApplied = saved.transferApplied;
+      if (Array.isArray(saved.pinnedCardIds)) state.pinnedCardIds = saved.pinnedCardIds;
+      if (typeof saved.demoScenario === "string") state.demoScenario = saved.demoScenario;
+      if (typeof saved.budgetEditId === "string" || saved.budgetEditId === null) state.budgetEditId = saved.budgetEditId;
+      if (saved.budgetDraft && typeof saved.budgetDraft === "object") state.budgetDraft = { ...state.budgetDraft, ...saved.budgetDraft };
+      if (typeof saved.goalEditId === "string" || saved.goalEditId === null) state.goalEditId = saved.goalEditId;
+      if (saved.goalDraft && typeof saved.goalDraft === "object") state.goalDraft = { ...state.goalDraft, ...saved.goalDraft };
+      if (saved.adminState && typeof saved.adminState === "object") state.adminState = { ...state.adminState, ...saved.adminState };
+      if (typeof saved.billReminderView === "string") state.billReminderView = saved.billReminderView;
+      if (saved.habitState && typeof saved.habitState === "object") {
+        state.habitState = { ...state.habitState, ...saved.habitState };
+      }
+      if (saved.notificationPrefs && typeof saved.notificationPrefs === "object") {
+        state.notificationPrefs = {
+          ...state.notificationPrefs,
+          ...saved.notificationPrefs,
+          channels: { ...state.notificationPrefs.channels, ...(saved.notificationPrefs.channels || {}) },
+        };
+      }
+      if (Array.isArray(saved.coachMessages)) state.coachMessages = saved.coachMessages;
+      if (Array.isArray(saved.wins)) state.wins = saved.wins;
+    }
+  } catch (error) {
+    console.warn("Unable to load saved state", error);
+  }
+}
+
+function saveState() {
+  try {
+    const payload = {
+      onboardingComplete: state.onboardingComplete,
+      onboardingStep: state.onboardingStep,
+      route: state.route,
+      lastRoute: state.lastRoute,
+      userProfile: state.userProfile,
+      completedActions: state.completedActions,
+      transferApplied: state.transferApplied,
+      pinnedCardIds: state.pinnedCardIds,
+      demoScenario: state.demoScenario,
+      budgetEditId: state.budgetEditId,
+      budgetDraft: state.budgetDraft,
+      goalEditId: state.goalEditId,
+      goalDraft: state.goalDraft,
+      adminState: state.adminState,
+      billReminderView: state.billReminderView,
+      habitState: state.habitState,
+      notificationPrefs: state.notificationPrefs,
+      coachMessages: state.coachMessages,
+      wins: state.wins,
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+  } catch (error) {
+    console.warn("Unable to save state", error);
+  }
+}
+
+function updateAppCheckInHabit() {
+  const today = new Date().toISOString().slice(0, 10);
+  const lastSeen = state.habitState.lastSeenDate;
+  if (lastSeen === today) return;
+
+  const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+  state.habitState.appCheckInStreak = lastSeen === yesterday ? state.habitState.appCheckInStreak + 1 : 1;
+  state.habitState.lastSeenDate = today;
+}
+
+function habitModel(snapshot) {
+  if (snapshot.billPressure === "high" || snapshot.safeToSpend < 0) {
+    return {
+      stage: "Protect",
+      cue: "Plan or pay bills before spending.",
+      action: "Review bills first",
+      reward: "Stay ahead of surprise expenses",
+      next: "Build savings after essentials are safe",
+    };
+  }
+
+  if (snapshot.safeToSpend < 150) {
+    return {
+      stage: "Save",
+      cue: "Set aside a small amount before it disappears.",
+      action: "Move money to savings",
+      reward: "Grow a buffer with less effort",
+      next: "Protect a minimum balance",
+    };
+  }
+
+  return {
+    stage: "Grow",
+    cue: "Route spare dollars toward future goals.",
+    action: "Review goals and grow cushion",
+    reward: "Build momentum toward investing",
+    next: "Learn about small investing steps",
+  };
+}
+
+const accounts = [
+  { id: "a1", name: "Everyday Checking", type: "checking", balance: 1184, availableBalance: 1184 },
+  { id: "a2", name: "Safety Buffer", type: "savings", balance: 720, availableBalance: 720 },
+  { id: "a3", name: "Rewards Card", type: "credit", balance: -214, availableBalance: 1786 },
+];
+
+const bills = [
+  { id: "b1", name: "Rent", amount: 1226, dueDate: "Friday", status: "upcoming", isEssential: true },
+  { id: "b2", name: "Electric", amount: 86, dueDate: "Monday", status: "upcoming", isEssential: true },
+  { id: "b3", name: "Phone", amount: 54, dueDate: "May 24", status: "scheduled", isEssential: true },
+  { id: "b4", name: "Streaming Bundle", amount: 22, dueDate: "May 28", status: "upcoming", isEssential: false },
+];
+
+const transactions = [
+  { id: "t1", merchant: "Fresh Market", amount: -38.42, category: "Groceries", date: "Today", reviewed: true },
+  { id: "t2", merchant: "Blue Bottle", amount: -6.8, category: "Dining", date: "Yesterday", reviewed: true },
+  { id: "t3", merchant: "RideShare", amount: -18.25, category: "Transport", date: "Yesterday", reviewed: false },
+  { id: "t4", merchant: "Paycheck", amount: 980, category: "Income", date: "May 13", reviewed: true },
+  { id: "t5", merchant: "Streamly", amount: -22, category: "Subscriptions", date: "May 12", reviewed: false },
+];
+
+const categories = [
+  { id: "c1", name: "Groceries", spent: 248, target: 300 },
+  { id: "c2", name: "Dining", spent: 126, target: 140 },
+  { id: "c3", name: "Transport", spent: 82, target: 160 },
+];
+
+const goals = [
+  { id: "g1", name: "Emergency buffer", currentAmount: 720, targetAmount: 1200 },
+  { id: "g2", name: "Move-in cushion", currentAmount: 310, targetAmount: 900 },
+];
+
+function currency(value) {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  }).format(value);
+}
+
+function currencyInputValue(value) {
+  return Number.isFinite(value) ? String(value) : "";
+}
+function buildBudgetSeed(profile) {
+  const monthlyIncome = Math.max(Number(profile.monthlyIncome) || 0, 0);
+  const essentials = Math.max(Number(profile.monthlyEssentials) || 0, 0);
+  const incomeType = profile.incomeType || "salary";
+  const incomeConfidence = incomeType === "gig" ? 0.72 : incomeType === "mixed" ? 0.88 : 1;
+  const taxReserveRate = incomeType === "gig" ? 0.18 : incomeType === "mixed" ? 0.12 : 0.08;
+  const conservativeIncome = Math.max(0, Math.round(monthlyIncome * incomeConfidence));
+  const taxReserve = Math.round(conservativeIncome * taxReserveRate);
+  const remaining = Math.max(0, conservativeIncome - essentials - taxReserve);
+  const discretionary = Math.max(0, Math.round(remaining * 0.22));
+  const savings = Math.max(0, Math.round(remaining * 0.18));
+  const transport = Math.max(0, Math.round(remaining * 0.14));
+  const dining = Math.max(0, Math.round(remaining * 0.12));
+  const groceries = Math.max(0, Math.round(remaining * 0.18));
+  const misc = Math.max(0, remaining - (discretionary + savings + transport + dining + groceries));
+
+  return [
+    { id: "seed-housing", name: "Housing", spent: Math.max(0, Math.round(essentials * 0.58)), target: Math.max(0, Math.round(essentials * 0.6)) },
+    { id: "seed-groceries", name: "Groceries", spent: 0, target: groceries || 200 },
+    { id: "seed-transport", name: "Transport", spent: 0, target: transport || 120 },
+    { id: "seed-dining", name: "Dining", spent: 0, target: dining || 80 },
+    { id: "seed-savings", name: "Savings", spent: 0, target: savings || 150 },
+    { id: "seed-tax", name: "Tax reserve", spent: 0, target: taxReserve || 100 },
+    { id: "seed-discretionary", name: "Discretionary", spent: 0, target: discretionary || misc || 100 },
+  ];
+}
+
+function applyBudgetSeedFromOnboarding() {
+  const seeded = buildBudgetSeed(state.userProfile);
+  categories.splice(0, categories.length, ...seeded);
+}
+
+function buildGoalSeed(profile) {
+  const goalPriority = profile.goalPriority || "buffer";
+  const emergencyBuffer = { id: "goal-buffer", name: "Emergency buffer", currentAmount: 0, targetAmount: 1200 };
+  if (goalPriority === "debt") {
+    return [
+      { id: "goal-debt", name: "Pay down debt", currentAmount: 0, targetAmount: 2500 },
+      emergencyBuffer,
+    ];
+  }
+  if (goalPriority === "savings") {
+    return [
+      { id: "goal-savings", name: "Grow savings", currentAmount: 0, targetAmount: 2000 },
+      emergencyBuffer,
+    ];
+  }
+  return [
+    emergencyBuffer,
+    { id: "goal-momentum", name: "Monthly breathing room", currentAmount: 0, targetAmount: 600 },
+  ];
+}
+
+function applyGoalSeedFromOnboarding() {
+  const seeded = buildGoalSeed(state.userProfile);
+  goals.splice(0, goals.length, ...seeded);
+}
+
+function ensureEmergencyBufferGoal() {
+  const hasEmergencyBuffer = goals.some((goal) => goal.name === "Emergency buffer");
+  if (!hasEmergencyBuffer) {
+    goals.unshift({ id: "goal-buffer", name: "Emergency buffer", currentAmount: 0, targetAmount: 1200 });
+  }
+}
+
+function buildPhoneNotifications(snapshot) {
+  const items = [];
+  if (snapshot.safeToSpend < 0) {
+    items.push({
+      id: "phone-low-balance",
+      level: "critical",
+      title: "Bank alert: low balance",
+      body: `Checking is short by ${currency(Math.abs(snapshot.safeToSpend))} after essentials.`,
+      route: "paydays",
+    });
+  } else if (snapshot.safeToSpend < 150) {
+    items.push({
+      id: "phone-low-balance-watch",
+      level: "warning",
+      title: "Bank alert: balance getting tight",
+      body: `Only ${currency(snapshot.safeToSpend)} remains after upcoming bills.`,
+      route: "cash-flow",
+    });
+  }
+
+  const overspendingCategory = snapshot.categoryPressure.find((category) => category.pressure === "high");
+  if (overspendingCategory) {
+    items.push({
+      id: "phone-overspending",
+      level: "warning",
+      title: `Spending alert: ${overspendingCategory.name}`,
+      body: `${overspendingCategory.name} is ${Math.round(overspendingCategory.ratio * 100)}% of budget.`,
+      route: "budgets",
+    });
+  }
+
+  if (!items.length) {
+    items.push({
+      id: "phone-ok",
+      level: "info",
+      title: "Notifications quiet",
+      body: "No urgent balance or overspending alerts right now.",
+      route: "home",
+    });
+  }
+
+  return items;
+}
+
+function buildBillReminders(snapshot) {
+  const reminders = [];
+  const nextBills = bills.filter((bill) => ["upcoming", "scheduled"].includes(bill.status)).slice(0, 3);
+  const recurringTransactions = transactions.filter((transaction) => transaction.isRecurring);
+  const payDay = state.userProfile.paycheckDay || "Friday";
+
+  reminders.push({
+    id: "onboarding-paycheck",
+    source: "Onboarding",
+    title: `Payday expectation set to ${payDay}`,
+    body: `FinCoach uses your income timing and paycheck day to place bill reminders earlier when income is variable.`,
+    route: "paydays",
+  });
+
+  nextBills.forEach((bill) => {
+    reminders.push({
+      id: `bill-${bill.id}`,
+      source: bill.isEssential ? "Bill schedule" : "Optional bill",
+      title: `${bill.name} due ${bill.dueDate}`,
+      body: `${currency(bill.amount)} is scheduled as ${bill.status}.`,
+      route: bill.id === "b1" ? "move-savings" : "cash-flow",
+    });
+  });
+
+  const reviewNeeded = transactions.filter((transaction) => !transaction.reviewed).length;
+  if (reviewNeeded > 0) {
+    reminders.push({
+      id: "transaction-review",
+      source: "Transaction pattern",
+      title: `${reviewNeeded} transaction${reviewNeeded === 1 ? "" : "s"} still need review`,
+      body: "FinCoach treats unreviewed activity as a signal to keep budgets and reminder timing accurate.",
+      route: "transactions",
+    });
+  }
+
+  if (recurringTransactions.length) {
+    reminders.push({
+      id: "recurring-detect",
+      source: "Pattern detection",
+      title: `${recurringTransactions.length} recurring transaction${recurringTransactions.length === 1 ? "" : "s"} detected`,
+      body: "Recurring items can become bill reminders or expected spending alerts later.",
+      route: "categorization",
+    });
+  }
+
+  if (snapshot.billPressure === "high" || snapshot.safeToSpend < 150) {
+    reminders.push({
+      id: "urgent-timing",
+      source: "Cash-flow engine",
+      title: "Timing reminder enabled early",
+      body: "High bill pressure moves reminders earlier so the user has time to act before harm happens.",
+      route: "cash-flow",
+    });
+  }
+
+  return reminders.slice(0, 5);
+}
+
+function deriveFinancialSnapshot() {
+  const checking = accounts.find((account) => account.type === "checking").availableBalance;
+  const essentialBills = bills
+    .filter((bill) => bill.isEssential && ["upcoming", "scheduled"].includes(bill.status))
+    .reduce((sum, bill) => sum + bill.amount, 0);
+  const safeToSpend = checking - essentialBills;
+  const unreadAlerts = transactions.filter((transaction) => !transaction.reviewed).length;
+  const tight = safeToSpend < 0;
+  const incomeType = state.userProfile.incomeType || "salary";
+  const incomeConfidence = incomeType === "gig" ? 0.72 : incomeType === "mixed" ? 0.88 : 1;
+  const taxReserveRate = incomeType === "gig" ? 0.18 : incomeType === "mixed" ? 0.12 : 0.08;
+  const conservativeMonthlyIncome = Math.max(0, Math.round(state.userProfile.monthlyIncome * incomeConfidence));
+  const taxReserve = Math.round(conservativeMonthlyIncome * taxReserveRate);
+  const categoryPressure = categories.map((category) => ({
+    ...category,
+    ratio: category.spent / category.target,
+    pressure: category.spent / category.target > 0.85 ? "high" : category.spent / category.target > 0.7 ? "medium" : "low",
+  }));
+  const alerts = [];
+  if (safeToSpend < 0) {
+    alerts.push({
+      id: "low-balance",
+      level: "critical",
+      title: "Low balance risk",
+      body: `You are ${currency(Math.abs(safeToSpend))} short after upcoming essentials.`,
+      route: "paydays",
+    });
+  } else if (safeToSpend < 150) {
+    alerts.push({
+      id: "low-balance-watch",
+      level: "warning",
+      title: "Low balance watch",
+      body: `Only ${currency(safeToSpend)} is left after near-term bills.`,
+      route: "cash-flow",
+    });
+  }
+
+  const overspendingCategory = categoryPressure.find((category) => category.pressure === "high");
+  if (overspendingCategory) {
+    alerts.push({
+      id: "overspending",
+      level: "warning",
+      title: `${overspendingCategory.name} is over plan`,
+      body: `${overspendingCategory.name} is using ${Math.round(overspendingCategory.ratio * 100)}% of its monthly target.`,
+      route: "budgets",
+    });
+  }
+
+  if (unreadAlerts > 0) {
+    alerts.push({
+      id: "transaction-review",
+      level: "info",
+      title: `${unreadAlerts} transaction${unreadAlerts === 1 ? "" : "s"} need review`,
+      body: "A quick review keeps budgets and alerts accurate.",
+      route: "transactions",
+    });
+  }
+
+  return {
+    financialState: tight ? "tight" : safeToSpend > 150 ? "stable" : "watching",
+    billPressure: tight ? "high" : safeToSpend < 150 ? "medium" : "low",
+    safeToSpend,
+    unreadAlerts,
+    streakDays: state.wins.length + state.completedActions.length,
+    categoryPressure,
+    incomeType,
+    conservativeMonthlyIncome,
+    taxReserve,
+    monthlyFlexibleSurplus: conservativeMonthlyIncome - state.userProfile.monthlyEssentials - taxReserve,
+    projectedBufferMonths: Math.max(
+      0,
+      Math.round((state.userProfile.monthlyEssentials / Math.max(conservativeMonthlyIncome - state.userProfile.monthlyEssentials - taxReserve, 1)) * 10) / 10,
+    ),
+    alerts,
+  };
+}
+
+function applyDemoScenario(snapshot) {
+  const scenario = state.demoScenario;
+  if (scenario === "fraud") {
+    return {
+      ...snapshot,
+      financialState: "tight",
+      billPressure: "high",
+      alertMode: "fraud",
+    };
+  }
+  if (scenario === "overdraft") {
+    return {
+      ...snapshot,
+      financialState: "tight",
+      billPressure: "high",
+      safeToSpend: -47,
+      alertMode: "overdraft",
+    };
+  }
+  if (scenario === "bill-heavy") {
+    return {
+      ...snapshot,
+      financialState: "tight",
+      billPressure: "high",
+      alertMode: "bill-heavy",
+    };
+  }
+  if (scenario === "buffer-watch") {
+    return {
+      ...snapshot,
+      financialState: "watching",
+      billPressure: "medium",
+      alertMode: "buffer-watch",
+    };
+  }
+  if (scenario === "growth") {
+    return {
+      ...snapshot,
+      financialState: "stable",
+      billPressure: "low",
+      safeToSpend: snapshot.safeToSpend + 140,
+      alertMode: "growth",
+    };
+  }
+  return snapshot;
+}
+
+function coachMessage(snapshot) {
+  const scenario = state.demoScenario;
+  if (scenario === "fraud") {
+    return {
+      title: "Possible fraud needs a quick review.",
+      copy: "I spotted a charge that does not match your usual pattern. Review it now to stay ahead of risk.",
+      label: "Fraud alert",
+    };
+  }
+
+  if (scenario === "overdraft") {
+    return {
+      title: "Your checking may dip below zero soon.",
+      copy: "The timing looks tight. Here are a couple of ways to protect the account before damage happens.",
+      label: "Overdraft risk",
+    };
+  }
+
+  if (scenario === "bill-heavy") {
+    return {
+      title: `${user.preferredName}, this is a bill-heavy week.`,
+      copy: "I found a few ways to create breathing room before rent. Tap this space to ask why.",
+      label: "Bill pressure high",
+    };
+  }
+
+  if (scenario === "buffer-watch") {
+    return {
+      title: "Your bills are covered. Let's protect the buffer.",
+      copy: "A quick timing check and one savings scan can keep the week steady.",
+      label: "Buffer watch",
+    };
+  }
+
+  if (scenario === "growth") {
+    return {
+      title: "You have room to make progress.",
+      copy: `Bills are covered and ${currency(snapshot.safeToSpend)} is safe-to-spend. Want to build cushion?`,
+      label: "Stable cash flow",
+    };
+  }
+
+  if (snapshot.financialState === "tight") {
+    return {
+      title: `${user.preferredName}, this is a bill-heavy week.`,
+      copy: `I found a few ways to create breathing room before rent. Tap this space to ask why.`,
+      label: "Bill pressure high",
+    };
+  }
+
+  if (snapshot.financialState === "watching") {
+    return {
+      title: "Your bills are covered. Let's protect the buffer.",
+      copy: "A quick timing check and one savings scan can keep the week steady.",
+      label: "Buffer watch",
+    };
+  }
+
+  return {
+    title: "You have room to make progress.",
+    copy: `Bills are covered and ${currency(snapshot.safeToSpend)} is safe-to-spend. Want to build cushion?`,
+    label: "Stable cash flow",
+  };
+}
+
+function heroVariant(snapshot) {
+  const scenario = state.demoScenario;
+  if (scenario === "fraud") return "fraud";
+  if (scenario === "overdraft") return "overdraft";
+  if (snapshot.billPressure === "high" || snapshot.financialState === "tight") return "critical";
+  if (snapshot.financialState === "watching") return "watching";
+  return "stable";
+}
+
+function recommendedActions(snapshot) {
+  const scenario = state.demoScenario;
+  if (scenario === "fraud") {
+    return [
+      { label: "Review charge", route: "transactions" },
+      { label: "Contact bank", route: "accounts" },
+    ];
+  }
+
+  if (scenario === "overdraft") {
+    return [
+      { label: "Protect balance", route: "paydays" },
+      { label: "Find breathing room", route: "hidden-savings" },
+    ];
+  }
+
+  if (snapshot.billPressure === "high") {
+    return [
+      { label: "Create breathing room", route: "hidden-savings" },
+      { label: "Protect bills", route: "paydays" },
+    ];
+  }
+
+  if (snapshot.financialState === "watching") {
+    return [
+      { label: "Keep buffer steady", route: "paydays" },
+      { label: "Find hidden savings", route: "hidden-savings" },
+    ];
+  }
+
+  return [
+    { label: "Build cushion", route: "savings" },
+    { label: "Find hidden savings", route: "hidden-savings" },
+    { label: "Review goals", route: "goals" },
+  ];
+}
+
+function contextCards(snapshot) {
+  const highCategory = snapshot.categoryPressure.find((category) => category.pressure === "high");
+  const habit = habitModel(snapshot);
+  const cards = snapshot.alerts.map((alert) => ({
+    id: `alert-${alert.id}`,
+    visual: alert.level === "critical" ? "credit" : alert.level === "warning" ? "save" : "briefing",
+    value: alert.level === "critical" ? "Now" : alert.level === "warning" ? "Soon" : "Info",
+    type: alert.level === "critical" ? "Critical alert" : alert.level === "warning" ? "Watch alert" : "Info alert",
+    title: alert.title,
+    description: alert.body,
+    route: alert.route,
+  }));
+
+  cards.push({
+    id: "habit-ladder",
+    visual: "spark",
+    value: habit.stage,
+    type: "Habit cue",
+    title: habit.action,
+    description: habit.cue,
+    route: "coach-chat",
+  });
+
+  cards.push(
+    {
+      id: "overspending-watch",
+      visual: "speedometer",
+      value: currency(snapshot.safeToSpend),
+      type: "Overspending watch",
+      title: "Safe-to-spend",
+      description: "What is left after essentials and near-term pressure.",
+      route: "bills",
+    },
+    {
+      id: "pending-transactions",
+      visual: "briefing",
+      value: `${transactions.filter((transaction) => !transaction.reviewed).length} items`,
+      type: "Pending transactions",
+      title: "Needs review",
+      description: "Recent spending that still needs a quick look.",
+      route: "transactions",
+    },
+    {
+      id: "low-balance-guard",
+      visual: "save",
+      value: currency(snapshot.totalBalance),
+      type: "Low balance guard",
+      title: "Overdraft watch",
+      description: "Balance risk before the next bill and payday shift.",
+      route: "paydays",
+    }
+  );
+
+  if (highCategory) {
+    cards.push({
+      id: "category",
+      visual: "target",
+      value: currency(highCategory.target - highCategory.spent),
+      type: "Category pressure",
+      title: `${highCategory.name} pressure`,
+      description: `${highCategory.name} has this much room left.`,
+      route: "insights",
+    });
+  }
+
+  cards.push({
+    id: "suspicious-activity",
+    visual: "credit",
+    value: "Alert",
+    type: "Suspicious activity",
+    title: "Fraud watch",
+    description: "Unusual spending patterns deserve attention before the next refresh.",
+    route: "insights",
+  });
+
+  cards.push({
+    id: "hidden-savings",
+    visual: "spark",
+    value: "$100",
+    type: "Auto-save opportunity",
+    title: "Breathing room scan",
+    description: "Small timing and spend moves that may create extra cushion.",
+    route: "hidden-savings",
+  });
+
+  return cards.slice(0, 5);
+}
+
+function getPinnedCards(cards) {
+  return state.pinnedCardIds
+    .map((id) => cards.find((card) => card.id === id))
+    .filter(Boolean);
+}
+
+function getUnpinnedCards(cards) {
+  return cards.filter((card) => !state.pinnedCardIds.includes(card.id));
+}
+
+const savingsOpportunities = [
+  { title: "Round up spare change", description: "Sweep small transaction roundups into the buffer.", impact: "~$25/mo" },
+  { title: "Pause one subscription", description: "Review the streaming bundle before it renews.", impact: "$22" },
+  { title: "Move leftover bill buffer", description: "After electric clears, move unused cushion to savings.", impact: "~$15" },
+];
+
+const moneyMoves = [
+  { title: "Cover the rent gap", reason: "Prevents the week from starting short.", route: "move-savings", priority: "High" },
+  { title: "Categorize two transactions", reason: "Improves category pressure recommendations.", route: "transactions", priority: "Medium" },
+  { title: "Review streaming bundle", reason: "Could free cash before the next bill cycle.", route: "subscription-review", priority: "Low" },
+];
+
+const couponProvider = {
+  name: "Mock Coupon Feed",
+  source: "integration-ready",
+  endpoint: "/api/coupons",
+  lastSync: "Just now",
+};
+
+const sponsoredOffers = [
+  {
+    id: "s1",
+    sponsor: "FreshCart",
+    title: "Save $15 on groceries",
+    description: "Relevant because grocery pressure is high.",
+    code: "BUFFER15",
+    accent: "green",
+    expires: "Friday",
+    terms: "New users only",
+    route: "offer-detail",
+  },
+  {
+    id: "s2",
+    sponsor: "RideLoop",
+    title: "Cut ride costs",
+    description: "20% off rides before payday.",
+    code: "MOVE20",
+    accent: "blue",
+    expires: "Sunday",
+    terms: "One use per account",
+    route: "offer-detail",
+  },
+  {
+    id: "s3",
+    sponsor: "MealNest",
+    title: "$8 meal credit",
+    description: "Useful when dining is near target.",
+    code: "CALM8",
+    accent: "amber",
+    expires: "Next week",
+    terms: "Minimum spend may apply",
+    route: "offer-detail",
+  },
+];
+
+const app = document.querySelector("#app");
+const screenTitle = document.querySelector("#screen-title");
+
+function setRoute(route) {
+  state.lastRoute = state.route;
+  state.route = route;
+  render();
+}
+
+function render() {
+  try {
+    updateAppCheckInHabit();
+    const snapshot = deriveFinancialSnapshot();
+    const demoSnapshot = applyDemoScenario(snapshot);
+    document.querySelectorAll(".nav-item").forEach((item) => {
+      item.classList.toggle("active", item.dataset.route === normalizeNavRoute(state.route));
+    });
+
+    const routes = {
+      login: () => renderLogin(),
+      "sign-up": () => renderSignUp(),
+      "forgot-password": () => renderForgotPassword(),
+      "identity-check": () => renderIdentityCheck(),
+      "create-password": () => renderCreatePassword(),
+      admin: () => renderAdmin(),
+      "phone-os": () => renderPhoneOS(snapshot),
+      onboarding: () => renderOnboarding(snapshot),
+      home: () => renderHome(demoSnapshot),
+      budgets: () => renderBudgets(snapshot),
+      bills: () => renderBills(snapshot),
+      transactions: () => renderTransactions(),
+      categorization: () => renderCategorization(),
+      paydays: () => renderPaydays(snapshot),
+      savings: () => renderSavings(),
+      habits: () => renderHabits(snapshot),
+      "wins-log": () => renderWinsLog(snapshot),
+      insights: () => renderInsights(snapshot),
+      accounts: () => renderAccounts(),
+      "cash-flow": () => renderCashFlow(snapshot),
+      goals: () => renderGoals(),
+      workflows: () => renderWorkflows(demoSnapshot),
+      reports: () => renderReports(snapshot),
+      settings: () => renderSettings(snapshot),
+      "coach-chat": () => renderCoachChat(demoSnapshot),
+      "stocks-waitlist": () => renderStocksWaitlist(),
+      "offer-detail": () => renderOfferDetail(),
+      "hidden-savings": () => renderHiddenSavings(demoSnapshot),
+      "log-win": () => renderLogWin(),
+      "move-savings": () => renderMoveSavings(snapshot),
+      "subscription-review": () => renderSubscriptionReview(),
+      "add-funds": () => renderAddFunds(),
+    };
+
+    const initialRoute = state.onboardingComplete ? state.route : "onboarding";
+    app.innerHTML = (routes[initialRoute] || routes.home)();
+    bindRouteButtons();
+    app.scrollTop = 0;
+    saveState();
+  } catch (error) {
+    screenTitle.textContent = "Prototype";
+    app.innerHTML = `
+      <article class="section-card">
+        <h2>Let's reset the view</h2>
+        <p>The prototype hit a temporary display issue. Your fake data is still here.</p>
+        <button class="cta" type="button" data-route="home">Return home</button>
+      </article>
+    `;
+    bindRouteButtons();
+    console.error(error);
+  }
+}
+
+function normalizeNavRoute(route) {
+  if (["budgets", "bills", "transactions", "categorization", "paydays"].includes(route)) return "budgets";
+  if (route === "accounts") return "accounts";
+  if (["reports", "insights", "cash-flow", "goals"].includes(route)) return "insights";
+  if (route === "habits") return "insights";
+  if (["workflows", "coach-chat", "hidden-savings", "log-win", "move-savings", "subscription-review", "stocks-waitlist"].includes(route)) return "workflows";
+  if (["login", "sign-up", "forgot-password", "identity-check", "create-password", "admin", "phone-os"].includes(route)) return "settings";
+  if (route === "settings") return "settings";
+  return "home";
+}
+
+function bindRouteButtons() {
+  app.querySelectorAll("[data-hero-route]").forEach((hero) => {
+    hero.addEventListener("click", (event) => {
+      if (event.target.closest("button, input, form")) return;
+      setRoute(hero.dataset.heroRoute);
+    });
+  });
+
+  app.querySelectorAll("[data-route]").forEach((button) => {
+    button.addEventListener("click", () => setRoute(button.dataset.route));
+  });
+
+  app.querySelectorAll("[data-complete]").forEach((button) => {
+    button.addEventListener("click", () => {
+      completeAction(button.dataset.complete);
+      setRoute(button.dataset.next || "home");
+    });
+  });
+
+  app.querySelectorAll("[data-onboarding-set]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const key = button.dataset.onboardingSet;
+      state.userProfile[key] = button.dataset.value;
+      saveState();
+      render();
+    });
+  });
+
+  app.querySelectorAll("[data-onboarding-input]").forEach((input) => {
+    input.addEventListener("change", () => {
+      const key = input.dataset.onboardingInput;
+      const rawValue = input.value;
+      state.userProfile[key] = key === "monthlyIncome" || key === "monthlyEssentials" ? Number(rawValue || 0) : rawValue;
+      if (key === "displayName") user.preferredName = rawValue.trim() || "User";
+      saveState();
+      render();
+    });
+  });
+
+  app.querySelectorAll("[data-onboarding-next]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.onboardingStep = Math.min(state.onboardingStep + 1, 4);
+      saveState();
+      render();
+    });
+  });
+
+  app.querySelectorAll("[data-onboarding-skip-goals]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.userProfile.goalPriority = "buffer";
+      applyBudgetSeedFromOnboarding();
+      applyGoalSeedFromOnboarding();
+      state.onboardingComplete = true;
+      state.route = "home";
+      state.budgetEditId = null;
+      state.budgetDraft = { name: "", spent: 0, target: 0 };
+      state.goalEditId = null;
+      state.goalDraft = { name: "", currentAmount: 0, targetAmount: 0 };
+      saveState();
+      render();
+    });
+  });
+
+  app.querySelectorAll("[data-onboarding-finish]").forEach((button) => {
+    button.addEventListener("click", () => {
+      applyBudgetSeedFromOnboarding();
+      applyGoalSeedFromOnboarding();
+      state.onboardingComplete = true;
+      state.route = "home";
+      state.budgetEditId = null;
+      state.budgetDraft = { name: "", spent: 0, target: 0 };
+      state.goalEditId = null;
+      state.goalDraft = { name: "", currentAmount: 0, targetAmount: 0 };
+      saveState();
+      render();
+    });
+  });
+
+  app.querySelectorAll("[data-demo-scenario]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.demoScenario = button.dataset.demoScenario;
+      saveState();
+      render();
+    });
+  });
+
+  app.querySelectorAll("[data-auth-route]").forEach((button) => {
+    button.addEventListener("click", () => setRoute(button.dataset.authRoute));
+  });
+
+  app.querySelectorAll("[data-auth-action]").forEach((button) => {
+    button.addEventListener("click", () => {
+      if (button.dataset.authAction === "login") state.authState = "signed_in";
+      if (button.dataset.authAction === "logout") state.authState = "signed_out";
+      if (button.dataset.authAction === "create-password") state.authState = "signed_in";
+      saveState();
+      render();
+    });
+  });
+
+  app.querySelectorAll("[data-admin-tab]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.adminState.selectedTab = button.dataset.adminTab;
+      saveState();
+      render();
+    });
+  });
+
+  app.querySelectorAll("[data-admin-toggle]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const key = button.dataset.adminToggle;
+      state.adminState[key] = !state.adminState[key];
+      saveState();
+      render();
+    });
+  });
+
+  app.querySelectorAll("[data-admin-field]").forEach((input) => {
+    input.addEventListener("input", () => {
+      const key = input.dataset.adminField;
+      state.adminState[key] = input.value;
+      saveState();
+    });
+  });
+
+  app.querySelectorAll("[data-reminder-view]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.billReminderView = button.dataset.reminderView;
+      saveState();
+      render();
+    });
+  });
+
+  app.querySelectorAll("[data-notification-toggle]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const key = button.dataset.notificationToggle;
+      state.notificationPrefs.channels[key] = !state.notificationPrefs.channels[key];
+      saveState();
+      render();
+    });
+  });
+
+  app.querySelectorAll("[data-notification-permission]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.notificationPrefs.permission = button.dataset.notificationPermission;
+      saveState();
+      render();
+    });
+  });
+
+  app.querySelectorAll("[data-budget-edit]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const category = categories.find((item) => item.id === button.dataset.budgetEdit);
+      if (!category) return;
+      state.budgetEditId = category.id;
+      state.budgetDraft = {
+        name: category.name,
+        spent: category.spent,
+        target: category.target,
+      };
+      render();
+    });
+  });
+
+  app.querySelectorAll("[data-budget-cancel]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.budgetEditId = null;
+      render();
+    });
+  });
+
+  app.querySelectorAll("[data-goal-edit]").forEach((button) => {
+    button.addEventListener("click", () => {
+      if (button.dataset.goalEdit === "new") {
+        state.goalEditId = "new";
+        state.goalDraft = { name: "", currentAmount: 0, targetAmount: 0 };
+      } else {
+        const goal = goals.find((item) => item.id === button.dataset.goalEdit);
+        if (!goal) return;
+        state.goalEditId = goal.id;
+        state.goalDraft = {
+          name: goal.name,
+          currentAmount: goal.currentAmount,
+          targetAmount: goal.targetAmount,
+        };
+      }
+      render();
+    });
+  });
+
+  app.querySelectorAll("[data-goal-cancel]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.goalEditId = null;
+      saveState();
+      render();
+    });
+  });
+
+  app.querySelectorAll("[data-goal-save]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const payload = {
+        name: state.goalDraft.name || "New goal",
+        currentAmount: Number(state.goalDraft.currentAmount) || 0,
+        targetAmount: Math.max(Number(state.goalDraft.targetAmount) || 0, 1),
+      };
+      if (state.goalEditId && state.goalEditId !== "new") {
+        const goal = goals.find((item) => item.id === state.goalEditId);
+        if (goal) Object.assign(goal, payload);
+      } else {
+        goals.unshift({ id: `g${Date.now()}`, ...payload });
+      }
+      ensureEmergencyBufferGoal();
+      state.goalEditId = null;
+      state.goalDraft = { name: "", currentAmount: 0, targetAmount: 0 };
+      saveState();
+      render();
+    });
+  });
+
+  app.querySelectorAll("[data-goal-field]").forEach((input) => {
+    input.addEventListener("input", () => {
+      const key = input.dataset.goalField;
+      state.goalDraft[key] = key === "name" ? input.value : Number(input.value || 0);
+      saveState();
+    });
+  });
+
+  app.querySelectorAll("[data-budget-save]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const isEditing = state.budgetEditId && categories.some((item) => item.id === state.budgetEditId);
+      if (isEditing) {
+        const category = categories.find((item) => item.id === state.budgetEditId);
+        if (category) {
+          category.name = state.budgetDraft.name || category.name;
+          category.spent = Number(state.budgetDraft.spent) || 0;
+          category.target = Math.max(Number(state.budgetDraft.target) || 0, 1);
+        }
+      } else {
+        categories.unshift({
+          id: `c${Date.now()}`,
+          name: state.budgetDraft.name || "New category",
+          spent: Number(state.budgetDraft.spent) || 0,
+          target: Math.max(Number(state.budgetDraft.target) || 0, 1),
+        });
+      }
+      state.budgetEditId = null;
+      state.budgetDraft = { name: "", spent: 0, target: 0 };
+      saveState();
+      render();
+    });
+  });
+
+  app.querySelectorAll("[data-budget-field]").forEach((input) => {
+    input.addEventListener("input", () => {
+      const key = input.dataset.budgetField;
+      state.budgetDraft[key] = key === "name" ? input.value : Number(input.value || 0);
+      saveState();
+    });
+  });
+
+  app.querySelectorAll("[data-pin-card]").forEach((button) => {
+    button.addEventListener("click", (event) => {
+      event.stopPropagation();
+      const cardId = button.dataset.pinCard;
+      if (state.pinnedCardIds.includes(cardId)) {
+        state.pinnedCardIds = state.pinnedCardIds.filter((id) => id !== cardId);
+      } else {
+        state.pinnedCardIds = [cardId, ...state.pinnedCardIds].slice(0, 4);
+      }
+      saveState();
+      render();
+    });
+  });
+
+  const coachForm = app.querySelector("[data-coach-form]");
+  if (coachForm) {
+    coachForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const input = coachForm.querySelector("input");
+      const question = input.value.trim();
+      if (!question) return;
+      state.coachMessages.push({ from: "user", text: question });
+      state.coachMessages.push({ from: "coach", text: coachReply(question) });
+      input.value = "";
+      if (coachForm.dataset.nextRoute) {
+        setRoute(coachForm.dataset.nextRoute);
+        return;
+      }
+      render();
+    });
+  }
+}
+
+function completeAction(label) {
+  state.completedActions.push(label);
+
+  if (label.includes("Logged today's win")) {
+    state.wins.unshift({
+      id: `w${Date.now()}`,
+      title: "Logged today's money win",
+      date: "Today",
+      source: "manual",
+    });
+  }
+
+  if ((label.includes("Moved $50") || label.includes("Added $50")) && !state.transferApplied) {
+    const checking = accounts.find((account) => account.type === "checking");
+    const savings = accounts.find((account) => account.type === "savings");
+    checking.balance += 50;
+    checking.availableBalance += 50;
+    savings.balance -= 50;
+    savings.availableBalance -= 50;
+    state.transferApplied = true;
+  }
+}
+
+function renderHome(snapshot) {
+  const coach = coachMessage(snapshot);
+  const cards = contextCards(snapshot);
+  const pinnedCards = getPinnedCards(cards);
+  const otherCards = getUnpinnedCards(cards);
+  const heroClass = heroVariant(snapshot);
+  const habit = habitModel(snapshot);
+  screenTitle.textContent = "Overview";
+  const habitLabel = `${snapshot.streakDays}d streak`;
+  const screenMeta = document.querySelector("#screen-meta");
+  if (screenMeta) screenMeta.textContent = habitLabel;
+
+  return `
+    <article class="coach-hero ${heroClass}" data-hero-route="coach-chat" role="button" tabindex="0" aria-label="Open FinCoach chat">
+      <div class="hero-top">
+        <span class="state-pill ${heroClass}"><span class="state-dot"></span>${coach.label}</span>
+        <h2 class="hero-title">${coach.title}</h2>
+        <p class="hero-copy">
+          <span>${coach.copy.replace(" Tap this space to ask why.", "")}</span>
+          ${coach.copy.includes("Tap this space to ask why.") ? ` <button class="hero-copy-link" type="button" data-route="coach-chat">Tap this space to ask why.</button>` : ""}
+        </p>
+        ${heroClass === "critical" || heroClass === "fraud" || heroClass === "overdraft" ? "" : `
+        <div class="safe-spend">
+          <div class="dial"><div class="dial-inner">${currency(snapshot.safeToSpend)}</div></div>
+          <div>
+            <p class="safe-label">Estimated safe-to-spend</p>
+            <p class="safe-detail">After upcoming essentials and current buffer pressure. Habit stage: ${habit.stage}.</p>
+          </div>
+        </div>`}
+      </div>
+      <div class="hero-actions">
+        ${heroStrategies(snapshot).map((strategy) => `<button class="coach-action strategy-action" type="button" data-route="${strategy.route}">${strategy.label}</button>`).join("")}
+      </div>
+    </article>
+
+    <div class="action-row">
+      ${secondaryChip("Categorize", "categorization", "grid")}
+      ${secondaryChip("Goals", "goals", "target")}
+      ${secondaryChip("Bills", "paydays", "bill")}
+      ${secondaryChip("Recent", "transactions", "clock")}
+    </div>
+
+    <div class="section-title">
+      <h2>Pinned context</h2>
+      <p>Tap pin to keep on screen</p>
+    </div>
+    <div class="context-grid">
+      ${pinnedCards.map(renderContextCard).join("")}
+    </div>
+
+    <div class="section-title">
+      <h2>More context</h2>
+      <p>Swipe for the rest</p>
+    </div>
+    <div class="context-rail">
+      ${otherCards.map(renderContextCard).join("")}
+    </div>
+
+    <div class="section-title sponsored-title">
+      <h2>Sponsored savings</h2>
+      <p>Offers</p>
+    </div>
+    <div class="sponsor-rail">
+      ${sponsoredOffers.map(renderSponsoredOffer).join("")}
+    </div>
+  `;
+}
+
+function renderOnboarding(snapshot) {
+  screenTitle.textContent = "Welcome";
+  const currentStep = state.onboardingStep;
+  const steps = [
+    {
+      title: "What should we call you?",
+      copy: "This helps FinCoach personalize the coach tone and home screen.",
+      body: `
+        <div class="workflow-choices">
+          <label class="onboarding-field" style="grid-column:1 / -1;">
+            <span>Name</span>
+            <input data-onboarding-input="displayName" type="text" placeholder="Your name" value="${state.userProfile.displayName || ""}" />
+          </label>
+        </div>
+        <button class="choice-button onboarding-choice" type="button" data-onboarding-next>Next</button>
+      `,
+    },
+    {
+      title: "Choose your income type",
+      copy: "This changes how FinCoach estimates budget room, buffer, and cash-flow caution.",
+      body: `
+        <div class="workflow-choices">
+          <button class="choice-button onboarding-choice ${state.userProfile.incomeType === "salary" ? "selected" : ""}" type="button" data-onboarding-set="incomeType" data-value="salary">Salary</button>
+          <button class="choice-button onboarding-choice ${state.userProfile.incomeType === "gig" ? "selected" : ""}" type="button" data-onboarding-set="incomeType" data-value="gig">Gig / freelance</button>
+          <button class="choice-button onboarding-choice ${state.userProfile.incomeType === "mixed" ? "selected" : ""}" type="button" data-onboarding-set="incomeType" data-value="mixed">Mixed income</button>
+        </div>
+        <button class="choice-button onboarding-choice" type="button" data-onboarding-next>Next</button>
+      `,
+    },
+    {
+      title: "Tell us your rhythm",
+      copy: "FinCoach uses this to set expectations about when money arrives.",
+      body: `
+        <div class="workflow-choices">
+          <button class="choice-button onboarding-choice ${state.userProfile.incomeTiming === "weekly" ? "selected" : ""}" type="button" data-onboarding-set="incomeTiming" data-value="weekly">Weekly income</button>
+          <button class="choice-button onboarding-choice ${state.userProfile.incomeTiming === "biweekly" ? "selected" : ""}" type="button" data-onboarding-set="incomeTiming" data-value="biweekly">Every 2 weeks</button>
+          <button class="choice-button onboarding-choice ${state.userProfile.incomeTiming === "monthly" ? "selected" : ""}" type="button" data-onboarding-set="incomeTiming" data-value="monthly">Monthly income</button>
+        </div>
+        <button class="choice-button onboarding-choice" type="button" data-onboarding-next>Next</button>
+      `,
+    },
+    {
+      title: "Set a simple budget baseline",
+      copy: "You can edit this later. We just need a starting point for manual budgets and coaching.",
+      body: `
+        <div class="workflow-choices">
+          <label class="onboarding-field">
+            <span>Payday</span>
+            <select data-onboarding-input="paycheckDay">
+              ${["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"].map((day) => `<option value="${day}" ${state.userProfile.paycheckDay === day ? "selected" : ""}>${day}</option>`).join("")}
+            </select>
+          </label>
+          <label class="onboarding-field">
+            <span>Monthly income</span>
+            <input data-onboarding-input="monthlyIncome" type="number" min="0" step="50" value="${currencyInputValue(state.userProfile.monthlyIncome)}" />
+          </label>
+          <label class="onboarding-field">
+            <span>Monthly essentials</span>
+            <input data-onboarding-input="monthlyEssentials" type="number" min="0" step="50" value="${currencyInputValue(state.userProfile.monthlyEssentials)}" />
+          </label>
+        </div>
+        <div class="onboarding-note">
+          <strong>Budget preview</strong>
+          <p>${currency(snapshot.conservativeMonthlyIncome)} conservative income, ${currency(snapshot.taxReserve)} tax reserve, and ${currency(snapshot.monthlyFlexibleSurplus)} left for category budgets.</p>
+        </div>
+        <button class="choice-button onboarding-choice" type="button" data-onboarding-next>Next</button>
+      `,
+    },
+    {
+      title: "Set a goal",
+      copy: "You can skip this and come back later from Goals.",
+      body: `
+        <div class="workflow-choices">
+          <button class="choice-button onboarding-choice ${state.userProfile.goalPriority === "buffer" ? "selected" : ""}" type="button" data-onboarding-set="goalPriority" data-value="buffer">Build emergency buffer</button>
+          <button class="choice-button onboarding-choice ${state.userProfile.goalPriority === "debt" ? "selected" : ""}" type="button" data-onboarding-set="goalPriority" data-value="debt">Pay down debt</button>
+          <button class="choice-button onboarding-choice ${state.userProfile.goalPriority === "savings" ? "selected" : ""}" type="button" data-onboarding-set="goalPriority" data-value="savings">Grow savings</button>
+        </div>
+        <div class="workflow-choices">
+          <button class="choice-button onboarding-choice" type="button" data-onboarding-finish>Save goals</button>
+          <button class="choice-button onboarding-choice" type="button" data-onboarding-skip-goals>Skip goals</button>
+        </div>
+      `,
+    },
+  ];
+
+  const step = steps[currentStep] || steps[0];
+  return `
+    <article class="onboarding-shell">
+      <div class="onboarding-badge">FinCoach setup</div>
+      <h2>${step.title}</h2>
+      <p>${step.copy}</p>
+      <div class="onboarding-progress" aria-hidden="true">
+        ${steps.map((_, index) => `<span class="${index <= currentStep ? "active" : ""}"></span>`).join("")}
+      </div>
+      ${step.body}
+      <div class="onboarding-note">
+        <strong>What this unlocks</strong>
+        <p>Budget categories, bill timing, and the first coaching recommendations will all start from this setup. Gig and mixed income modes use more conservative estimates.</p>
+      </div>
+    </article>
+  `;
+}
+
+function secondaryChip(label, route, icon) {
+  const icons = {
+    grid: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z" fill="currentColor"/></svg>',
+    target: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3a9 9 0 1 0 9 9h-3a6 6 0 1 1-6-6V3Zm0 5a4 4 0 1 0 4 4h3a7 7 0 1 1-7-7v3Z" fill="currentColor"/></svg>',
+    bill: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 3h12a1 1 0 0 1 1 1v16l-3-2-3 2-3-2-3 2-1-1V4a1 1 0 0 1 1-1Zm3 5h6M9 12h6M9 16h4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+    clock: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 4a8 8 0 1 0 8 8 8 8 0 0 0-8-8Zm1 4v4.2l3 1.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  };
+  return `<button class="chip" type="button" data-route="${route}"><span aria-hidden="true">${icons[icon] || ""}</span><span>${label}</span></button>`;
+}
+
+function renderContextCard(card) {
+  const isPinned = state.pinnedCardIds.includes(card.id);
+  return `
+    <div class="context-card visual-card ${card.visual}" role="button" tabindex="0" data-route="${card.route}">
+      <button class="pin-toggle ${isPinned ? "is-pinned" : ""}" type="button" data-pin-card="${card.id}" aria-label="${isPinned ? "Unpin" : "Pin"} ${card.title}">
+        ${isPinned ? "Pinned" : "Pin"}
+      </button>
+      <span class="card-visual" aria-hidden="true">${renderCardVisual(card)}</span>
+      <span class="card-copy">
+        <p class="card-type">${card.type}</p>
+        <h3>${card.title}</h3>
+        <strong>${card.value}</strong>
+        <p>${card.description}</p>
+      </span>
+      <span class="arrow" aria-hidden="true">?</span>
+    </div>
+  `;
+}
+
+function heroStrategies(snapshot) {
+  const scenario = state.demoScenario;
+  if (scenario === "fraud") {
+    return [
+      { label: "Review suspicious charge", route: "transactions" },
+      { label: "Secure accounts", route: "accounts" },
+    ];
+  }
+  if (scenario === "overdraft") {
+    return [
+      { label: "Protect balance", route: "paydays" },
+      { label: "Find $50 buffer", route: "hidden-savings" },
+    ];
+  }
+  if (scenario === "bill-heavy") {
+    return [
+      { label: "Shield bills", route: "paydays" },
+      { label: "Move funds safely", route: "move-savings" },
+    ];
+  }
+  if (scenario === "buffer-watch") {
+    return [
+      { label: "Keep buffer steady", route: "savings" },
+      { label: "Check cash timing", route: "cash-flow" },
+    ];
+  }
+  if (scenario === "growth") {
+    return [
+      { label: "Build cushion", route: "savings" },
+      { label: "Push goal progress", route: "goals" },
+    ];
+  }
+  return [
+    { label: "Build cushion", route: "savings" },
+    { label: "Review goals", route: "goals" },
+  ];
+}
+
+function renderCardVisual(card) {
+  if (card.visual === "speedometer") {
+    return `<span class="mini-gauge"><span class="gauge-needle"></span><span class="gauge-value">${card.value}</span></span>`;
+  }
+
+  if (card.visual === "briefing") {
+    return `<span class="briefing-art"><span class="sun-dot"></span><span class="note-lines"></span></span>`;
+  }
+
+  if (card.visual === "target") {
+    return `<span class="target-art"><span></span></span>`;
+  }
+
+  if (card.visual === "clock") {
+    return `<span class="clock-art"><span></span></span>`;
+  }
+
+  if (card.visual === "spark") {
+    return `<span class="spark-art"><span></span></span>`;
+  }
+
+  if (card.visual === "save") {
+    return `<span class="save-art"><span></span></span>`;
+  }
+
+  if (card.visual === "credit") {
+    return `<span class="credit-art"><span></span></span>`;
+  }
+
+  return `<span class="momentum-art"><span></span></span>`;
+}
+
+function renderSponsoredOffer(offer) {
+  return `
+    <button class="sponsor-card ${offer.accent}" type="button" data-route="${offer.route}">
+      <span class="sponsor-label">Sponsored</span>
+      <span class="sponsor-brand">${offer.sponsor}</span>
+      <strong>${offer.title}</strong>
+      <span class="sponsor-copy">${offer.description}</span>
+      <span class="coupon-row">
+        <span>Ends ${offer.expires}</span>
+        <span>${offer.terms}</span>
+      </span>
+    </button>
+  `;
+}
+
+function renderOfferDetail() {
+  screenTitle.textContent = "Offer";
+  return `
+    ${screenHeading("Sponsored offer", "Integration-ready coupon space for partner savings and click-through tracking.")}
+    <article class="coupon-detail">
+      <p class="sponsor-label">Sponsored</p>
+      <h3>Save on a planned purchase</h3>
+      <p>This prototype shows how FinCoach can surface partner-funded coupons without mixing them into AI recommendations.</p>
+      <div class="coupon-code">BUFFER15</div>
+      <p>Provider: ${couponProvider.name} · Sync: ${couponProvider.lastSync}</p>
+      <button class="cta" type="button" data-route="home">Back to dashboard</button>
+    </article>
+  `;
+}
+
+function coachReply(question) {
+  const lower = question.toLowerCase();
+  if (lower.includes("100") || lower.includes("hidden") || lower.includes("find") || lower.includes("save")) {
+    return "I found a possible $100 in breathing room: $22 from a subscription pause, $30 from dining guardrails, $15 from a grocery offer, $18 from transport timing, and $15 from moving leftover bill buffer after electric clears.";
+  }
+
+  if (lower.includes("why") || lower.includes("rent") || lower.includes("bill")) {
+    return "The main pressure is timing: rent and electric arrive before your buffer fully rebuilds. The lowest-stress path is to cover the rent gap first, then review flexible spending after essentials are safe.";
+  }
+
+  if (lower.includes("savings")) {
+    return "A small savings action is useful only after the near-term bills are protected. Today, I would keep the move small: $10-$50, then revisit after Friday.";
+  }
+
+  if (lower.includes("learn") || lower.includes("lesson")) {
+    return "A helpful lesson here is buffer before budget: when cash timing is tight, a small liquid cushion matters more than perfect category tracking.";
+  }
+
+  return "What matters now is reducing surprise. I would first protect the upcoming bill, then clear the two transactions that are making the forecast less certain.";
+}
+
+function renderCoachChat(snapshot) {
+  const coach = coachMessage(snapshot);
+  screenTitle.textContent = "FinCoach";
+  return `
+    ${screenHeading("Ask FinCoach", "A calm coaching prompt for what matters now, why it matters, and what to do next.")}
+    <article class="coach-chat-summary">
+      <p class="card-type">${coach.label}</p>
+      <h3>${coach.title}</h3>
+      <p>${coach.copy}</p>
+      <div class="quick-links">
+        <button class="cta secondary" type="button" data-route="workflows">Recommended money moves</button>
+        <button class="cta secondary" type="button" data-route="move-savings">Suggested action</button>
+        <button class="cta secondary" type="button" data-route="cash-flow">Financial rationale</button>
+        <button class="cta secondary" type="button" data-route="insights">Related lesson</button>
+        <button class="cta secondary" type="button" data-route="stocks-waitlist">Join stock waitlist</button>
+      </div>
+    </article>
+    <div class="coach-thread">
+      ${state.coachMessages.map((message) => `
+        <div class="coach-bubble ${message.from === "user" ? "user-bubble" : ""}">
+          <p>${message.text}</p>
+        </div>
+      `).join("")}
+    </div>
+    <form class="coach-prompt" data-coach-form>
+      <input aria-label="Ask FinCoach" placeholder="Ask why this matters..." />
+      <button type="submit">Ask</button>
+    </form>
+  `;
+}
+
+function hiddenSavingsItems() {
+  return [
+    { title: "Pause streaming bundle", amount: 22, route: "subscription-review", detail: "Renews May 28 and is non-essential this week." },
+    { title: "Dining guardrail", amount: 30, route: "budgets", detail: "Dining is close to target; a small cap preserves the buffer." },
+    { title: "Grocery partner offer", amount: 15, route: "offer-detail", detail: "Sponsored coupon can offset planned grocery spend." },
+    { title: "Transport timing", amount: 18, route: "transactions", detail: "Shift one rideshare trip to transit or delay it." },
+    { title: "Leftover bill buffer", amount: 15, route: "cash-flow", detail: "Move unused cushion after electric clears." },
+  ];
+}
+
+function renderHiddenSavings(snapshot) {
+  screenTitle.textContent = "Hidden Savings";
+  const items = hiddenSavingsItems();
+  const total = items.reduce((sum, item) => sum + item.amount, 0);
+  return `
+    ${screenHeading("Hidden Savings Scan", "FinCoach found realistic breathing room from bills, categories, timing, and offers.")}
+    <article class="hidden-savings-hero">
+      <p class="card-type">Potential breathing room</p>
+      <h3>${currency(total)}</h3>
+      <p>These are not judgments. They are small optional moves you can review one at a time.</p>
+      <button class="cta" type="button" data-route="coach-chat">Ask why these moves</button>
+    </article>
+    ${items.map((item) => `
+      <article class="list-card savings-scan-item">
+        <span>
+          <h3>${item.title}</h3>
+          <p>${item.detail}</p>
+        </span>
+        <strong>${currency(item.amount)}</strong>
+        <button class="cta secondary" type="button" data-route="${item.route}">Review</button>
+      </article>
+    `).join("")}
+  `;
+}
+function renderSavingsBlock() {
+  return `
+    <section class="section-card">
+      <div class="section-title"><h2>Savings Opportunities</h2><p>1-5 items</p></div>
+      ${savingsOpportunities.map((item) => `
+        <div class="list-item">
+          <span><strong>${item.title}</strong><small>${item.description}</small></span>
+          <span class="impact">${item.impact}</span>
+        </div>
+      `).join("")}
+      <button class="cta" type="button" data-route="savings">Adjust savings rule</button>
+    </section>
+  `;
+}
+
+function renderDailyWinsBlock(snapshot) {
+  return `
+    <section class="section-card">
+      <div class="section-title"><h2>Daily Wins</h2><p>${snapshot.streakDays}-day streak</p></div>
+      <p>You have been checking in consistently. Log one positive action to keep the pattern visible.</p>
+      <button class="cta" type="button" data-route="log-win">Log today's win</button>
+    </section>
+  `;
+}
+
+function renderMoneyMovesBlock() {
+  return `
+    <section class="section-card">
+      <div class="section-title"><h2>Money Moves</h2><p>Prioritized</p></div>
+      ${moneyMoves.map((move) => `
+        <div class="list-item">
+          <span><strong>${move.title}</strong><small>${move.reason}</small></span>
+          <button class="cta secondary" type="button" data-route="${move.route}">${move.priority}</button>
+        </div>
+      `).join("")}
+    </section>
+  `;
+}
+
+function renderBills(snapshot) {
+  screenTitle.textContent = "Bills";
+  return `
+    ${screenHeading("Bills", "Review upcoming bill pressure and choose the next calm action.")}
+    <div class="metric-grid">
+      ${metric("Bill pressure", snapshot.billPressure)}
+      ${metric("Current gap", currency(Math.min(snapshot.safeToSpend, 0)))}
+    </div>
+    ${bills.map((bill) => `
+      <article class="list-card">
+        <h3>${bill.name}</h3>
+        <p>${bill.dueDate} Â· ${currency(bill.amount)} Â· ${bill.status}</p>
+        <button class="cta secondary" type="button" data-route="${bill.id === "b1" ? "move-savings" : "cash-flow"}">Review plan</button>
+      </article>
+    `).join("")}
+  `;
+}
+
+function renderBudgets(snapshot) {
+  screenTitle.textContent = "Budgets";
+  const highestPressure = snapshot.categoryPressure
+    .slice()
+    .sort((a, b) => b.ratio - a.ratio)[0];
+
+  return `
+    ${screenHeading("Budgets", "Category budgets with coaching context when a category starts feeling tight.")}
+    <div class="metric-grid">
+      ${metric("Highest pressure", highestPressure.name)}
+      ${metric("Room left", currency(highestPressure.target - highestPressure.spent))}
+    </div>
+    <article class="budget-editor">
+      <div class="budget-editor-header">
+        <div>
+          <h2>Category editor</h2>
+          <p>Edit an existing category or create a new one.</p>
+        </div>
+        <button class="cta secondary" type="button" data-budget-edit="new">Add category</button>
+      </div>
+      ${state.budgetEditId ? `
+        <div class="budget-edit-panel">
+          <label class="onboarding-field">
+            <span>Category name</span>
+            <input data-budget-field="name" type="text" value="${state.budgetDraft.name || ""}" placeholder="New category" />
+          </label>
+          <label class="onboarding-field">
+            <span>Spent so far</span>
+            <input data-budget-field="spent" type="number" min="0" step="1" value="${currencyInputValue(state.budgetDraft.spent)}" />
+          </label>
+          <label class="onboarding-field">
+            <span>Monthly target</span>
+            <input data-budget-field="target" type="number" min="1" step="1" value="${currencyInputValue(state.budgetDraft.target)}" />
+          </label>
+          <div class="workflow-choices">
+            <button class="choice-button" type="button" data-budget-save>Save budget</button>
+            <button class="choice-button" type="button" data-budget-cancel>Cancel</button>
+          </div>
+        </div>
+      ` : ""}
+    </article>
+    ${snapshot.categoryPressure.map((category) => `
+      <article class="list-card">
+        <h3>${category.name}</h3>
+        <p>${currency(category.spent)} of ${currency(category.target)} used · ${category.pressure} pressure</p>
+        <div class="progress-track"><div class="progress-fill" style="width:${Math.min(category.ratio * 100, 100)}%"></div></div>
+        <div class="workflow-choices">
+          <button class="cta secondary" type="button" data-budget-edit="${category.id}">Edit</button>
+          <button class="cta secondary" type="button" data-route="${category.pressure === "high" ? "coach-chat" : "transactions"}">
+            ${category.pressure === "high" ? "Ask about this" : "See activity"}
+          </button>
+        </div>
+      </article>
+    `).join("")}
+  `;
+}
+
+function renderTransactions() {
+  screenTitle.textContent = "Transactions";
+  return `
+    ${screenHeading("Transactions", "Recent activity with just enough review to improve recommendations.")}
+    ${transactions.map((transaction) => `
+      <article class="list-card">
+        <h3>${transaction.merchant}</h3>
+        <p>${transaction.date} Â· ${currency(transaction.amount)} Â· ${transaction.category}</p>
+        <span class="status-badge ${transaction.reviewed ? "" : "attention"}">${transaction.reviewed ? "Reviewed" : "Needs review"}</span>
+      </article>
+    `).join("")}
+    <button class="cta" type="button" data-complete="Categorized recent transactions">Mark review complete</button>
+  `;
+}
+
+function renderCategorization() {
+  screenTitle.textContent = "Categorize";
+  const needsReview = transactions.filter((transaction) => !transaction.reviewed);
+  return `
+    ${screenHeading("Categorization", "Clear uncertain transactions so budgets and coaching recommendations stay useful.")}
+    <div class="metric-grid">
+      ${metric("Needs review", needsReview.length)}
+      ${metric("Categories", categories.length)}
+    </div>
+    ${needsReview.map((transaction) => `
+      <article class="list-card">
+        <h3>${transaction.merchant}</h3>
+        <p>${transaction.date} Â· ${currency(transaction.amount)} Â· Suggested: ${transaction.category}</p>
+        <button class="cta secondary" type="button" data-complete="Categorized ${transaction.merchant}" data-next="categorization">Confirm category</button>
+      </article>
+    `).join("") || `
+      <article class="list-card">
+        <h3>Everything is categorized</h3>
+        <p>No uncertain transactions need review right now.</p>
+      </article>
+    `}
+  `;
+}
+
+function renderSavings() {
+  screenTitle.textContent = "Savings";
+  return `
+    ${screenHeading("Savings Plan", "Small automatic moves that build the buffer without creating pressure.")}
+    <article class="section-card">
+      <h2>Current rule</h2>
+      <p>Round up card purchases and sweep the difference every Friday.</p>
+      <button class="cta" type="button" data-complete="Adjusted savings rule">Use $10 weekly sweep</button>
+    </article>
+    ${renderSavingsBlock()}
+  `;
+}
+
+function renderWinsLog(snapshot) {
+  screenTitle.textContent = "Wins";
+  return `
+    ${screenHeading("Wins Log", "Positive actions compound when they are visible.")}
+    <div class="metric-grid">
+      ${metric("Current streak", `${snapshot.streakDays} days`)}
+      ${metric("Logged wins", state.wins.length)}
+    </div>
+    ${state.wins.map((win) => `
+      <article class="list-card">
+        <h3>${win.title}</h3>
+        <p>${win.date} Â· ${win.source}</p>
+      </article>
+    `).join("")}
+    <button class="cta" type="button" data-route="log-win">Log today's win</button>
+  `;
+}
+
+function renderHabits(snapshot) {
+  screenTitle.textContent = "Habits";
+  const habit = habitModel(snapshot);
+  return `
+    ${screenHeading("Habit loop", "Streaks, rewards, and the next repeatable action in one place.")}
+    <div class="metric-grid">
+      ${metric("Stage", habit.stage)}
+      ${metric("Streak", `${snapshot.streakDays} days`) }
+      ${metric("Reward", snapshot.streakDays >= 7 ? "Unlocked" : "Next check-in")}
+      ${metric("Cue", habit.cue)}
+    </div>
+    <article class="list-card">
+      <h3>Current habit</h3>
+      <p><strong>${habit.stage}:</strong> ${habit.action}. Reward: ${habit.reward}.</p>
+    </article>
+    <article class="list-card">
+      <h3>Next step</h3>
+      <p>${habit.next}</p>
+    </article>
+    <div class="workflow-choices">
+      <button class="choice-button" type="button" data-route="wins-log">Review wins</button>
+      <button class="choice-button" type="button" data-route="coach-chat">Ask about the habit</button>
+      <button class="choice-button" type="button" data-route="home">Back home</button>
+    </div>
+  `;
+}
+
+function renderInsights(snapshot) {
+  screenTitle.textContent = "Insights";
+  const strongestCategory = snapshot.categoryPressure
+    .slice()
+    .sort((a, b) => b.ratio - a.ratio)[0];
+  const hiddenSavings = snapshot.hiddenSavingsEstimate || 100;
+  const recurringCount = transactions.filter((transaction) => transaction.isRecurring).length;
+  const uncategorizedCount = transactions.filter((transaction) => !transaction.categoryId).length;
+  const highPressureCategories = snapshot.categoryPressure.filter((category) => category.pressure === "high").length;
+  return `
+    ${screenHeading("Insights", "Patterns explained in plain language, with the next useful action nearby.")}
+    <article class="insight-hero section-card">
+      <div class="insight-hero-copy">
+        <p class="card-type">Pattern finder</p>
+        <h2>${strongestCategory ? `${strongestCategory.name} is driving the most pressure` : "Your money is stable, but timing still matters"}</h2>
+        <p>${strongestCategory ? `This is the category most likely to affect your stated goals if it stays unchecked. It is taking the most room compared with the plan.` : "The clearest signal is not overspending. It is how bills and income line up across the month."}</p>
+      </div>
+      <div class="insight-gauge" aria-hidden="true">
+        <div class="gauge-label">Goal pressure</div>
+        <div class="gauge-value">${Math.min(Math.round((strongestCategory?.ratio || 0.42) * 100), 100)}%</div>
+        <div class="gauge-track">
+          <span style="width:${Math.min(Math.round((strongestCategory?.ratio || 0.42) * 100), 100)}%"></span>
+        </div>
+      </div>
+      <button class="cta" type="button" data-route="transactions">Review recent transactions</button>
+    </article>
+    <article class="insight-grid">
+      <article class="insight-card">
+        <span class="insight-badge warning">Cash flow timing</span>
+        <strong>${snapshot.billPressure === "high" ? "Bills arrive before the buffer is ready" : "Cash timing still deserves attention"}</strong>
+        <p>${snapshot.billPressure === "high" ? "A paycheck and a bill are too close together, so the month feels tighter than the raw balance suggests." : "The month may feel fine on paper, but a timing mismatch can still create stress later."}</p>
+        <div class="insight-bars" aria-hidden="true">
+          <span style="height:72%"></span>
+          <span style="height:56%"></span>
+          <span style="height:84%"></span>
+          <span style="height:40%"></span>
+        </div>
+        <button class="cta secondary" type="button" data-route="paydays">See bill timing</button>
+      </article>
+      <article class="insight-card">
+        <span class="insight-badge info">Hidden opportunity</span>
+        <strong>${currency(hiddenSavings)} in possible breathing room</strong>
+        <p>Small changes in timing, recurring spend, and category leakage may create room without hurting day-to-day life.</p>
+        <div class="mini-donut" aria-hidden="true">
+          <span style="--value:${Math.min(hiddenSavings, 100)}"></span>
+        </div>
+        <button class="cta secondary" type="button" data-route="hidden-savings">Open savings scan</button>
+      </article>
+      <article class="insight-card">
+        <span class="insight-badge danger">Risk check</span>
+        <strong>${highPressureCategories ? `${highPressureCategories} category${highPressureCategories === 1 ? "" : "ies"} need attention` : "No category is under heavy pressure"}</strong>
+        <p>${uncategorizedCount ? `${uncategorizedCount} transactions still need categorization, which can hide the real pattern.` : "Your categories are fairly clean, so the next gain is likely in timing or recurring spend."}</p>
+        <div class="insight-score">
+          <div>
+            <span>Recurring</span>
+            <strong>${recurringCount}</strong>
+          </div>
+          <div>
+            <span>Uncategorized</span>
+            <strong>${uncategorizedCount}</strong>
+          </div>
+        </div>
+        <button class="cta secondary" type="button" data-route="transactions">Clean up spending</button>
+      </article>
+    </article>
+  `;
+}
+
+function renderAccounts() {
+  screenTitle.textContent = "Accounts";
+  return `
+    ${screenHeading("Accounts", "Mock account balances for the prototype state engine.")}
+    ${accounts.map((account) => `
+      <article class="list-card">
+        <h3>${account.name}</h3>
+        <p>${account.type} Â· Available ${currency(account.availableBalance)}</p>
+      </article>
+    `).join("")}
+  `;
+}
+
+function renderCashFlow(snapshot) {
+  screenTitle.textContent = "Cash Flow";
+  return `
+    ${screenHeading("Cash Flow", "Near-term money movement without a spreadsheet feeling.")}
+    <div class="metric-grid">
+      ${metric("Incoming", currency(snapshot.conservativeMonthlyIncome))}
+      ${metric("Essentials", currency(state.userProfile.monthlyEssentials))}
+      ${metric("Safe-to-spend", currency(snapshot.safeToSpend))}
+      ${metric("Alerts", snapshot.unreadAlerts)}
+    </div>
+    <article class="section-card">
+      <h2>This week</h2>
+      <p>Rent and electric create the main pressure. A small transfer or bill timing adjustment brings the plan back into range. Current model: ${snapshot.incomeType} income with ${currency(snapshot.taxReserve)} held as reserve.</p>
+      <button class="cta" type="button" data-route="move-savings">Choose a fix</button>
+    </article>
+  `;
+}
+
+function renderPaydays(snapshot) {
+  screenTitle.textContent = "Bills";
+  const reminders = buildBillReminders(snapshot);
+  const compactReminders = reminders.slice(0, 3);
+  return `
+    ${screenHeading("Bills & Paydays", "Upcoming obligations and income timing in one place.")}
+    <div class="metric-grid">
+      ${metric("Next payday", "May 23")}
+      ${metric("Bill pressure", snapshot.billPressure)}
+    </div>
+    <article class="section-card">
+      <div class="budget-editor-header">
+        <div>
+          <h3>Reminder view</h3>
+          <p>Pick the format that is easiest to read quickly.</p>
+        </div>
+        <div class="workflow-choices">
+          <button class="choice-button ${state.billReminderView === "compact" ? "selected" : ""}" type="button" data-reminder-view="compact">Compact</button>
+          <button class="choice-button ${state.billReminderView === "calendar" ? "selected" : ""}" type="button" data-reminder-view="calendar">Calendar</button>
+          <button class="choice-button ${state.billReminderView === "list" ? "selected" : ""}" type="button" data-reminder-view="list">List</button>
+        </div>
+      </div>
+      <div class="reminder-view">
+        ${state.billReminderView === "calendar" ? `
+          <div class="mini-calendar">
+            ${bills.map((bill) => `
+              <article class="mini-calendar-item">
+                <span class="mini-calendar-day">${bill.dueDate}</span>
+                <strong>${bill.name}</strong>
+                <p>${currency(bill.amount)}</p>
+              </article>
+            `).join("")}
+          </div>
+        ` : state.billReminderView === "list" ? `
+          <div class="notification-tray compact-tray">
+            ${reminders.map((reminder) => `
+              <article class="phone-notification info">
+                <strong>${reminder.title}</strong>
+                <p>${reminder.body}</p>
+                <button class="cta secondary" type="button" data-route="${reminder.route}">Review</button>
+              </article>
+            `).join("")}
+          </div>
+        ` : `
+          <div class="notification-tray compact-tray">
+            ${compactReminders.map((reminder) => `
+              <article class="phone-notification info">
+                <strong>${reminder.title}</strong>
+                <p>${reminder.body}</p>
+              </article>
+            `).join("")}
+          </div>
+        `}
+      </div>
+    </article>
+    <article class="list-card">
+      <h3>Paycheck</h3>
+      <p>May 23 Â· ${currency(980)} expected Â· income</p>
+    </article>
+    ${bills.map((bill) => `
+      <article class="list-card">
+        <h3>${bill.name}</h3>
+        <p>${bill.dueDate} Â· ${currency(bill.amount)} Â· ${bill.status}</p>
+        <button class="cta secondary" type="button" data-route="${bill.id === "b1" ? "coach-chat" : "cash-flow"}">Plan timing</button>
+      </article>
+    `).join("")}
+  `;
+}
+
+function renderGoals() {
+  screenTitle.textContent = "Goals";
+  return `
+    ${screenHeading("Progress", "Simple goal tracking with next contributions kept small.")}
+    <article class="budget-editor">
+      <div class="budget-editor-header">
+        <div>
+          <h2>Goal editor</h2>
+          <p>Add or adjust a goal from here.</p>
+        </div>
+        <button class="cta secondary" type="button" data-goal-edit="new">Add goal</button>
+      </div>
+      ${state.goalEditId ? `
+        <div class="budget-edit-panel">
+          <label class="onboarding-field">
+            <span>Goal name</span>
+            <input data-goal-field="name" type="text" value="${state.goalDraft.name || ""}" placeholder="New goal" />
+          </label>
+          <label class="onboarding-field">
+            <span>Current amount</span>
+            <input data-goal-field="currentAmount" type="number" min="0" step="1" value="${currencyInputValue(state.goalDraft.currentAmount)}" />
+          </label>
+          <label class="onboarding-field">
+            <span>Target amount</span>
+            <input data-goal-field="targetAmount" type="number" min="1" step="1" value="${currencyInputValue(state.goalDraft.targetAmount)}" />
+          </label>
+          <div class="workflow-choices">
+            <button class="choice-button" type="button" data-goal-save>Save goal</button>
+            <button class="choice-button" type="button" data-goal-cancel>Cancel</button>
+          </div>
+        </div>
+      ` : ""}
+    </article>
+    ${goals.map((goal) => {
+      const percent = Math.round((goal.currentAmount / goal.targetAmount) * 100);
+      return `
+        <article class="list-card">
+          <h3>${goal.name}</h3>
+          <p>${currency(goal.currentAmount)} of ${currency(goal.targetAmount)} · ${percent}%</p>
+          <div class="progress-track"><div class="progress-fill" style="width:${percent}%"></div></div>
+          <div class="workflow-choices">
+            <button class="cta secondary" type="button" data-goal-edit="${goal.id}">Edit</button>
+          </div>
+        </article>
+      `;
+    }).join("")}
+    <button class="cta" type="button" data-route="savings">Adjust next contribution</button>
+  `;
+}
+function recommendedWorkflows(snapshot) {
+  const highCategory = snapshot.categoryPressure.find((category) => category.pressure === "high");
+  const needsReview = transactions.filter((transaction) => !transaction.reviewed).length;
+  const workflows = [
+    {
+      title: "Ask FinCoach",
+      copy: "Talk through what matters now and get the rationale behind the suggested paths.",
+      route: "coach-chat",
+      tag: "Coach",
+    },
+    {
+      title: "Find $100 hidden savings",
+      copy: "Scan subscriptions, category leakage, timing, and offers for realistic breathing room.",
+      route: "hidden-savings",
+      tag: "Scan",
+    },
+  ];
+
+  if (snapshot.billPressure === "high") {
+    workflows.push({
+      title: "Protect upcoming rent",
+      copy: "The current bill timing creates pressure. Compare a small transfer against the bill calendar.",
+      route: "move-savings",
+      tag: "High priority",
+    });
+  } else {
+    workflows.push({
+      title: "Review bills and paydays",
+      copy: "Bills are manageable, but timing still matters. Check the next payday and upcoming obligations.",
+      route: "paydays",
+      tag: "Timing",
+    });
+  }
+
+  if (highCategory) {
+    workflows.push({
+      title: `Review ${highCategory.name}`,
+      copy: "This category is close to its target. A quick look can prevent a surprise later.",
+      route: "budgets",
+      tag: "Budget",
+    });
+  }
+
+  if (needsReview > 0) {
+    workflows.push({
+      title: `Categorize ${needsReview} transactions`,
+      copy: "Clearing these improves budget accuracy and FinCoach recommendations.",
+      route: "categorization",
+      tag: "Review",
+    });
+  }
+
+  workflows.push({
+    title: "Log today's win",
+    copy: "Record one positive action so momentum stays visible.",
+    route: "log-win",
+    tag: "Habit",
+  });
+
+  return workflows.slice(0, 5);
+}
+
+function renderWorkflows(snapshot) {
+  screenTitle.textContent = "Money Moves";
+  const workflows = recommendedWorkflows(snapshot);
+  return `
+    ${screenHeading("Money Moves", "Generated from the user's bill pressure, budget pressure, and review gaps.")}
+    <article class="coach-chat-summary">
+      <p class="card-type">FinCoach controller</p>
+      <h3>Recommended path</h3>
+      <p>These money moves are selected from the current fake financial state. Use FinCoach to ask why, then choose an action.</p>
+      <button class="cta" type="button" data-route="coach-chat">Ask why this path</button>
+    </article>
+    ${workflows.map((workflow) => `
+      <article class="workflow-card">
+        <p class="card-type">${workflow.tag}</p>
+        <h3>${workflow.title}</h3>
+        <p>${workflow.copy}</p>
+        <button class="cta" type="button" data-route="${workflow.route}">Start</button>
+      </article>
+    `).join("")}
+  `;
+}
+
+function renderReports(snapshot) {
+  screenTitle.textContent = "Reports";
+  return `
+    ${screenHeading("Reports", "A calmer reporting surface focused on explanation.")}
+    <div class="metric-grid">
+      ${metric("Bill pressure", snapshot.billPressure)}
+      ${metric("Streak", `${snapshot.streakDays} days`)}
+      ${metric("Safe-to-spend", currency(snapshot.safeToSpend))}
+      ${metric("Budget buffer", `${snapshot.projectedBufferMonths} mo`)}
+    </div>
+    <button class="cta" type="button" data-route="insights">Open insights</button>
+  `;
+}
+
+function renderSettings(snapshot) {
+  screenTitle.textContent = "Settings";
+  const habit = habitModel(snapshot);
+  return `
+    ${screenHeading("Settings", "Prototype controls and preferences.")}
+    <article class="settings-card">
+      <h3>Demo state</h3>
+      <p>Use these scenarios to show different hero states during the demo.</p>
+      <div class="scenario-grid">
+        ${demoScenarios().map((scenario) => `
+          <button class="scenario-chip ${state.demoScenario === scenario.id ? "active" : ""}" type="button" data-demo-scenario="${scenario.id}">
+            <strong>${scenario.label}</strong>
+            <span>${scenario.copy}</span>
+          </button>
+        `).join("")}
+      </div>
+    </article>
+    <article class="settings-card">
+      <h3>Coaching tone</h3>
+      <p>Calm, direct, non-judgmental.</p>
+    </article>
+    <article class="settings-card">
+      <h3>Data mode</h3>
+      <p>Fake data only. No bank connection is active.</p>
+    </article>
+    <article class="settings-card">
+      <h3>Auth flows</h3>
+      <p>Login, password, and identity workflows for the MVP.</p>
+      <div class="workflow-choices">
+        <button class="choice-button" type="button" data-auth-route="login">Login</button>
+        <button class="choice-button" type="button" data-auth-route="sign-up">Sign up</button>
+        <button class="choice-button" type="button" data-auth-route="forgot-password">Reset password</button>
+        <button class="choice-button" type="button" data-auth-route="identity-check">Verify identity</button>
+        <button class="choice-button" type="button" data-auth-route="create-password">Create password</button>
+      </div>
+    </article>
+    <article class="settings-card">
+      <h3>Admin console</h3>
+      <p>Analytics, financial controls, and operational workflows.</p>
+      <button class="cta secondary" type="button" data-auth-route="admin">Open admin</button>
+    </article>
+    <article class="settings-card">
+      <h3>Coupon service</h3>
+      <p>${couponProvider.name} · ${couponProvider.endpoint}</p>
+      <p>Ready to swap to a live coupon or affiliate feed when you pick the provider.</p>
+    </article>
+    <article class="settings-card">
+      <h3>Investing waitlist</h3>
+      <p>Test demand for a future stock purchase feature without offering the service yet.</p>
+      <button class="cta secondary" type="button" data-route="stocks-waitlist">Join waitlist</button>
+    </article>
+    <article class="settings-card">
+      <h3>Prototype status</h3>
+      <p>${state.completedActions.length} money moves completed in this session.</p>
+    </article>
+    <article class="settings-card">
+      <h3>Habit systems</h3>
+      <p>Habits should help the user protect money now, save consistently next, and grow toward future investing later.</p>
+      <div class="metric-grid">
+        ${metric("Habit stage", habit.stage)}
+        ${metric("App habit", `${state.habitState.appCheckInStreak} day streak`)}
+      </div>
+      <div class="workflow-choices">
+        <button class="choice-button" type="button" data-route="coach-chat">${habit.action}</button>
+        <button class="choice-button" type="button" data-route="insights">See why</button>
+      </div>
+      <div class="workflow-choices">
+        <button class="choice-button" type="button" data-route="wins-log">Log a win</button>
+        <button class="choice-button" type="button" data-route="coach-chat">Ask a question</button>
+        <button class="choice-button" type="button" data-route="insights">Review patterns</button>
+      </div>
+    </article>
+    <article class="settings-card">
+      <h3>Phone notifications</h3>
+      <p>Mock notification center for low balance and overspending warnings.</p>
+      <div class="notification-tray">
+        ${buildPhoneNotifications(snapshot).map((notification) => `
+          <article class="phone-notification ${notification.level}">
+            <strong>${notification.title}</strong>
+            <p>${notification.body}</p>
+            <button class="cta secondary" type="button" data-route="${notification.route}">Open</button>
+          </article>
+        `).join("")}
+      </div>
+      <button class="cta secondary" type="button" data-route="phone-os">Open phone OS</button>
+    </article>
+  `;
+}
+
+function renderPhoneOS(snapshot) {
+  screenTitle.textContent = "Phone OS";
+  const notifications = buildPhoneNotifications(snapshot);
+  const channels = [
+    { key: "balance", label: "Low balance" },
+    { key: "spending", label: "Overspending" },
+    { key: "fraud", label: "Fraud risk" },
+    { key: "coupons", label: "Coupons" },
+    { key: "goals", label: "Goals" },
+  ];
+
+  return `
+    ${screenHeading("Phone OS", "A system-like notification center for balance, spending, fraud, coupon, and goal alerts.")}
+    <article class="section-card phone-os-shell">
+      <div class="phone-os-top">
+        <div>
+          <p class="eyebrow">Notification permission</p>
+          <h2>${state.notificationPrefs.permission === "allowed" ? "Allowed" : "Ask first"}</h2>
+        </div>
+        <button class="choice-button" type="button" data-notification-permission="${state.notificationPrefs.permission === "allowed" ? "ask" : "allowed"}">
+          ${state.notificationPrefs.permission === "allowed" ? "Pause notifications" : "Allow notifications"}
+        </button>
+      </div>
+      <div class="metric-grid">
+        ${metric("Balance", state.notificationPrefs.channels.balance ? "On" : "Off")}
+        ${metric("Spending", state.notificationPrefs.channels.spending ? "On" : "Off")}
+        ${metric("Fraud", state.notificationPrefs.channels.fraud ? "On" : "Off")}
+        ${metric("Coupons", state.notificationPrefs.channels.coupons ? "On" : "Off")}
+      </div>
+    </article>
+    <article class="section-card">
+      <h3>Channels</h3>
+      <div class="workflow-choices">
+        ${channels.map((channel) => `
+          <button class="choice-button ${state.notificationPrefs.channels[channel.key] ? "selected" : ""}" type="button" data-notification-toggle="${channel.key}">
+            ${channel.label}
+          </button>
+        `).join("")}
+      </div>
+    </article>
+    <article class="section-card">
+      <h3>Recent notifications</h3>
+      <div class="notification-tray">
+        ${notifications.map((notification) => `
+          <article class="phone-notification ${notification.level}">
+            <strong>${notification.title}</strong>
+            <p>${notification.body}</p>
+            <button class="cta secondary" type="button" data-route="${notification.route}">Review</button>
+          </article>
+        `).join("")}
+      </div>
+    </article>
+    <article class="list-card">
+      <h3>Delivery notes</h3>
+      <p>This mock OS can later map to native push notifications, in-app alerts, SMS, and email without changing the alert logic.</p>
+    </article>
+    <div class="workflow-choices">
+      <button class="choice-button" type="button" data-route="settings">Back to settings</button>
+      <button class="choice-button" type="button" data-route="home">Back home</button>
+    </div>
+  `;
+}
+
+function renderLogin() {
+  screenTitle.textContent = "Login";
+  return `
+    ${screenHeading("Login", "Sign in to access FinCoach.")}
+    <article class="workflow-card">
+      <h3>Welcome back</h3>
+      <div class="workflow-choices">
+        <label class="onboarding-field">
+          <span>Email</span>
+          <input type="email" placeholder="you@example.com" />
+        </label>
+        <label class="onboarding-field">
+          <span>Password</span>
+          <input type="password" placeholder="••••••••" />
+        </label>
+        <label class="onboarding-field">
+          <span>One-time code</span>
+          <input type="text" placeholder="123456" />
+        </label>
+      </div>
+      <div class="workflow-choices">
+        <button class="choice-button" type="button" data-auth-action="login">Sign in</button>
+        <button class="choice-button" type="button" data-auth-route="forgot-password">Forgot password</button>
+        <button class="choice-button" type="button" data-auth-route="identity-check">Verify identity</button>
+      </div>
+    </article>
+  `;
+}
+
+function renderSignUp() {
+  screenTitle.textContent = "Sign Up";
+  return `
+    ${screenHeading("Create account", "Set up identity and secure access.")}
+    <article class="workflow-card">
+      <h3>Create your profile</h3>
+      <div class="workflow-choices">
+        <label class="onboarding-field">
+          <span>Full name</span>
+          <input type="text" placeholder="Kyle Bray" />
+        </label>
+        <label class="onboarding-field">
+          <span>Email</span>
+          <input type="email" placeholder="you@example.com" />
+        </label>
+        <label class="onboarding-field">
+          <span>Password</span>
+          <input type="password" placeholder="Create a password" />
+        </label>
+      </div>
+      <div class="workflow-choices">
+        <button class="choice-button" type="button" data-auth-route="identity-check">Continue</button>
+        <button class="choice-button" type="button" data-auth-route="create-password">Create password</button>
+      </div>
+    </article>
+  `;
+}
+
+function renderForgotPassword() {
+  screenTitle.textContent = "Reset Password";
+  return `
+    ${screenHeading("Reset password", "Recover access with email, SMS, or backup verification.")}
+    <article class="workflow-card">
+      <h3>Send reset link</h3>
+      <div class="workflow-choices">
+        <button class="choice-button" type="button" data-auth-route="identity-check">Email reset link</button>
+        <button class="choice-button" type="button" data-auth-route="identity-check">Text code</button>
+        <button class="choice-button" type="button" data-route="login">Back to login</button>
+      </div>
+    </article>
+  `;
+}
+
+function renderIdentityCheck() {
+  screenTitle.textContent = "Identity";
+  return `
+    ${screenHeading("Verify identity", "Confirm the person, device, and recovery path before restoring access.")}
+    <article class="workflow-card">
+      <h3>Identity checks</h3>
+      <p>Use this mock screen for MFA, document check, recovery questions, and device trust.</p>
+      <div class="metric-grid">
+        ${metric("MFA", state.adminState.forceMfa ? "Required" : "Optional")}
+        ${metric("Recovery", "Email + SMS")}
+      </div>
+      <div class="workflow-choices">
+        <button class="choice-button" type="button" data-auth-action="login">Verify and continue</button>
+        <button class="choice-button" type="button" data-route="create-password">Create password</button>
+      </div>
+    </article>
+  `;
+}
+
+function renderCreatePassword() {
+  screenTitle.textContent = "Password";
+  return `
+    ${screenHeading("Create password", "Set a password with the right recovery checks around it.")}
+    <article class="workflow-card">
+      <h3>Create a strong password</h3>
+      <div class="workflow-choices">
+        <label class="onboarding-field">
+          <span>Password</span>
+          <input type="password" placeholder="New password" />
+        </label>
+        <label class="onboarding-field">
+          <span>Confirm</span>
+          <input type="password" placeholder="Confirm password" />
+        </label>
+      </div>
+      <div class="workflow-choices">
+        <button class="choice-button" type="button" data-auth-action="create-password">Save password</button>
+        <button class="choice-button" type="button" data-route="login">Back to login</button>
+      </div>
+    </article>
+  `;
+}
+
+function renderAdmin() {
+  screenTitle.textContent = "Admin";
+  const tab = state.adminState.selectedTab;
+  const panels = {
+    overview: `
+      <div class="metric-grid">
+        ${metric("Active users", 184)}
+        ${metric("Failed logins", 6)}
+        ${metric("Open alerts", state.authState === "signed_in" ? 12 : 0)}
+        ${metric("MFA coverage", "92%")}
+      </div>
+      <article class="list-card"><h3>System health</h3><p>Auth, budgets, alerts, and coupon sync are green in this mock console.</p></article>
+    `,
+    analytics: `
+      <article class="list-card"><h3>Product analytics</h3><p>Top actions, retention by onboarding path, alert response rate, coupon clicks, and goal completion.</p></article>
+      <div class="metric-grid">
+        ${metric("D7 retention", "41%")}
+        ${metric("Alert CTR", "68%")}
+        ${metric("Coupon CTR", "23%")}
+        ${metric("Budget edits", "54")}
+      </div>
+    `,
+    identity: `
+      <article class="list-card"><h3>Identity and access</h3><p>Reset MFA, unlock accounts, review risky devices, and approve recovery requests.</p></article>
+      <div class="workflow-choices">
+        <button class="choice-button" type="button" data-admin-toggle="forceMfa">MFA ${state.adminState.forceMfa ? "Required" : "Optional"}</button>
+        <button class="choice-button" type="button" data-auth-route="identity-check">Open verification flow</button>
+        <button class="choice-button" type="button" data-auth-route="forgot-password">Password reset flow</button>
+      </div>
+    `,
+    financial: `
+      <article class="list-card"><h3>Financial systems</h3><p>Monitor Plaid sync readiness, budget normalization, coupon feed sync, alert thresholds, and payout holds.</p></article>
+      <div class="workflow-choices">
+        <button class="choice-button" type="button" data-admin-toggle="alertsEnabled">Alerts ${state.adminState.alertsEnabled ? "On" : "Off"}</button>
+        <button class="choice-button" type="button" data-admin-toggle="payoutHold">Payout hold ${state.adminState.payoutHold ? "On" : "Off"}</button>
+        <button class="choice-button" type="button" data-route="budgets">Review budget mapping</button>
+      </div>
+    `,
+    security: `
+      <article class="list-card"><h3>Security workflow</h3><p>Session duration, password reset queue, device trust, rate limiting, and notification escalation rules.</p></article>
+      <div class="metric-grid">
+        ${metric("Lockouts", 2)}
+        ${metric("Password resets", 8)}
+        ${metric("Device trust", "71%")}
+        ${metric("Suspicious IPs", 1)}
+      </div>
+    `,
+  };
+
+  return `
+    ${screenHeading("Admin console", "Operational tools for FinCoach.")}
+    <div class="workflow-choices">
+      ${["overview", "analytics", "identity", "financial", "security"].map((name) => `
+        <button class="choice-button ${state.adminState.selectedTab === name ? "selected" : ""}" type="button" data-admin-tab="${name}">${name}</button>
+      `).join("")}
+    </div>
+    <article class="section-card">
+      ${panels[tab] || panels.overview}
+    </article>
+    <article class="settings-card">
+      <h3>Admin user search</h3>
+      <label class="onboarding-field">
+        <span>Search by name or email</span>
+        <input data-admin-field="userSearch" type="text" value="${state.adminState.userSearch || ""}" placeholder="Search users" />
+      </label>
+      <p>Search term: ${state.adminState.userSearch || "none"}</p>
+    </article>
+    <div class="workflow-choices">
+      <button class="choice-button" type="button" data-auth-route="login">Back to login</button>
+      <button class="choice-button" type="button" data-auth-action="logout">Sign out</button>
+    </div>
+  `;
+}
+
+function renderStocksWaitlist() {
+  screenTitle.textContent = "Waitlist";
+  return `
+    ${screenHeading("Stock purchase waitlist", "A smoke test for future demand. This does not place trades, give investment advice, or connect to a brokerage.")}
+    <article class="section-card">
+      <h2>Why this exists</h2>
+      <p>We want to understand whether users would want a future investing feature before we build anything regulated. This waitlist captures interest only.</p>
+      <button class="cta" type="button" data-route="home">Back to dashboard</button>
+    </article>
+    <article class="list-card">
+      <h3>What the feature could become</h3>
+      <p>Educational projections, opt-in scenario tools, and a future broker-partner flow if we decide to move beyond the prototype.</p>
+    </article>
+    <article class="list-card">
+      <h3>What it will not do here</h3>
+      <p>No order routing, no securities recommendations, no account linking for trading, and no borrowing against equities.</p>
+    </article>
+    <button class="cta secondary" type="button" data-complete="Joined stock waitlist" data-next="home">Join waitlist</button>
+  `;
+}
+
+function demoScenarios() {
+  return [
+    { id: "auto", label: "Auto", copy: "Uses live snapshot logic" },
+    { id: "bill-heavy", label: "Bill-heavy", copy: "Lead with pressure" },
+    { id: "buffer-watch", label: "Buffer watch", copy: "Protect cash cushion" },
+    { id: "overdraft", label: "Overdraft risk", copy: "Show urgency early" },
+    { id: "fraud", label: "Fraud alert", copy: "Interrupt with review" },
+    { id: "growth", label: "Growth", copy: "Stable cash flow" },
+  ];
+}
+
+function renderLogWin() {
+  screenTitle.textContent = "Log Win";
+  return `
+    ${screenHeading("Log today's win", "Pick one positive action. Keep it small and true.")}
+    <article class="workflow-card">
+      <h3>What went right today?</h3>
+      <div class="workflow-choices">
+        <button class="choice-button" type="button" data-complete="Logged today's win" data-next="wins-log">Checked upcoming bills</button>
+        <button class="choice-button" type="button" data-complete="Logged today's win" data-next="wins-log">Avoided an impulse purchase</button>
+        <button class="choice-button" type="button" data-complete="Logged today's win" data-next="wins-log">Reviewed spending without spiraling</button>
+      </div>
+    </article>
+  `;
+}
+
+function renderMoveSavings(snapshot) {
+  screenTitle.textContent = "Move Funds";
+  return `
+    ${screenHeading("Cover the rent gap", "A small transfer can reduce pressure before Friday.")}
+    <article class="workflow-card">
+      <h3>Suggested move</h3>
+      <p>Move $50 from Safety Buffer to Everyday Checking. This covers the current ${currency(Math.abs(snapshot.safeToSpend))} gap and leaves savings at ${currency(670)}.</p>
+      <div class="workflow-choices">
+        <button class="choice-button" type="button" data-complete="Moved $50 from savings">Move $50 from savings</button>
+        <button class="choice-button" type="button" data-route="bills">Review bills first</button>
+      </div>
+    </article>
+  `;
+}
+
+function renderSubscriptionReview() {
+  screenTitle.textContent = "Subscription";
+  return `
+    ${screenHeading("Review subscription", "Decide whether this still fits the week.")}
+    <article class="workflow-card">
+      <h3>Streaming Bundle</h3>
+      <p>$22 renews on May 28. Pausing it would add a little more breathing room this month.</p>
+      <div class="workflow-choices">
+        <button class="choice-button" type="button" data-complete="Paused streaming bundle">Pause for this month</button>
+        <button class="choice-button" type="button" data-complete="Kept streaming bundle">Keep and mark reviewed</button>
+      </div>
+    </article>
+  `;
+}
+
+function renderAddFunds() {
+  screenTitle.textContent = "Add Funds";
+  return `
+    ${screenHeading("Add Funds", "Mock flow for adjusting the short-term plan, with coaching one tap away.")}
+    <article class="workflow-card">
+      <h3>Choose an adjustment</h3>
+      <div class="workflow-choices">
+        <button class="choice-button" type="button" data-route="coach-chat">Ask FinCoach first</button>
+        <button class="choice-button" type="button" data-complete="Added $50 to checking">Add $50 to checking</button>
+        <button class="choice-button" type="button" data-complete="Planned incoming cash">Mark incoming cash for Friday</button>
+        <button class="choice-button" type="button" data-route="cash-flow">Review cash flow first</button>
+      </div>
+    </article>
+  `;
+}
+
+function screenHeading(title, copy) {
+  return `<div class="screen-heading"><p>${copy}</p></div>`;
+}
+
+function metric(label, value) {
+  return `<div class="metric"><span>${label}</span><strong>${value}</strong></div>`;
+}
+
+function workflowCard(title, copy, route) {
+  return `
+    <article class="workflow-card">
+      <h3>${title}</h3>
+      <p>${copy}</p>
+      <button class="cta" type="button" data-route="${route}">Start</button>
+    </article>
+  `;
+}
+
+document.querySelectorAll("[data-route]").forEach((button) => {
+  button.addEventListener("click", () => setRoute(button.dataset.route));
+});
+
+render();
+
+</script>
+    <script src="./analytics.js"></script>
+  </body>
+</html>
+
