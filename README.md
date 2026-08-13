@@ -34,3 +34,5 @@ Or use `provider: 'posthog'` if you decide to wire PostHog.
 
 ## Local preview
 Open `index.html` directly or serve the folder with any static server.
+
+Update: triggering GitHub Pages rebuild
