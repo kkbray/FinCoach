@@ -1,36 +1,38 @@
-﻿# FinCoach clickable prototype
+# FinCoach Prototype
 
-This folder is ready to upload to a static host.
+This is a mobile-first clickable prototype using fake data only.
+
+## Open It
+
+Best option on Windows:
+
+Double-click `Start_FinCoach_Prototype.bat`.
+
+That starts a tiny local preview server and opens:
+
+`http://127.0.0.1:4173/`
+
+Keep the server window open while using the prototype. If the page disappears or says it cannot connect, double-click the launcher again.
+
+Alternative:
+
+Open `index.html` directly in Microsoft Edge or Chrome. The file is bundled with its styles and scripts inline so it can still render if a browser has trouble loading nearby local assets. Some embedded browsers still block local `file://` pages, so the batch launcher is the most reliable path.
+
+No install step is required.
+
+## What Works
+
+- Dynamic coach dashboard with fake financial state.
+- Recommended actions that route to real prototype screens.
+- Secondary action row.
+- Vertical contextual feed.
+- Savings Opportunities, Daily Wins, and Money Moves.
+- Bottom navigation: Home, Workflows, Reports, Settings.
+- Secondary screens for Bills, Transactions, Savings, Wins, Insights, Accounts, Cash Flow, Goals, Reports, and Settings.
+- Simple workflows for logging a win, moving savings, reviewing a subscription, and adding funds.
 
 ## Files
-- `index.html`: self-contained clickable prototype
-- `analytics.js`: lightweight event tracking hook
-- `.nojekyll`: prevents GitHub Pages from treating the folder like a Jekyll site
-- `README.md`: quick publish notes
 
-## Analytics
-
-The analytics helper records:
-- screen views
-- route/button clicks
-- onboarding actions
-- habit and settings interactions
-
-By default it stores events in `window.__fincoachAnalyticsQueue` so the prototype still works even before you pick a provider.
-
-To connect a provider later, set a small config before the analytics script runs:
-
-```html
-<script>
-  window.FINCOACH_ANALYTICS = { provider: 'plausible' };
-</script>
-```
-
-Or use `provider: 'posthog'` if you decide to wire PostHog.
-
-## Publish options
-- GitHub Pages: upload the folder contents to the root of a Pages branch.
-- Netlify / Vercel / Cloudflare Pages: deploy this folder as the site root.
-
-## Local preview
-Open `index.html` directly or serve the folder with any static server.
+- `index.html`: app shell
+- `styles.css`: mobile-first visual system
+- `app.js`: fake data, state engine, routing, and screens

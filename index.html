@@ -1,5 +1,4 @@
-<!-- rebuild -->
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -339,6 +338,32 @@ h1 {
   margin-bottom: 18px;
   color: rgba(255, 255, 255, 0.82);
   line-height: 1.45;
+}
+
+.hero-copy-trigger {
+  display: block;
+  width: fit-content;
+  max-width: 320px;
+  padding: 0;
+  border: 0;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  line-height: inherit;
+  text-align: left;
+  cursor: text;
+}
+
+.hero-copy-trigger:hover,
+.hero-copy-trigger:focus-visible {
+  color: #fff;
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
+}
+
+[hidden] {
+  display: none !important;
 }
 
 .hero-copy-link {
@@ -1391,6 +1416,58 @@ h1 {
   font-weight: 900;
 }
 
+.hero-answer {
+  position: relative;
+  z-index: 2;
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.hero-answer .card-type {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.hero-answer p {
+  margin: 4px 0 0;
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.hero-conversation {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  gap: 8px;
+  max-height: 112px;
+  margin-top: 10px;
+  overflow-y: auto;
+  padding-right: 4px;
+  scrollbar-width: thin;
+}
+
+.hero-message {
+  max-width: 90%;
+  padding: 8px 10px;
+  border-radius: 12px;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.18);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.hero-message.user {
+  justify-self: end;
+  color: #05271f;
+  background: rgba(184, 255, 231, 0.92);
+}
+
+.hero-message p {
+  margin: 0;
+}
+
 .sponsored-title {
   margin-top: 16px;
 }
@@ -1567,10 +1644,6 @@ h1 {
 }
 
 /* Survey-informed variant overrides */
-.hero-prompt {
-  display: none;
-}
-
 .hero-chat-hint {
   position: relative;
   z-index: 2;
@@ -1986,8 +2059,7 @@ h1 {
   letter-spacing: 0.02em;
 }
 
-    </style>
-    <link rel="stylesheet" href="./styles.css" />
+</style>
   </head>
   <body>
     <main class="app-shell" aria-label="FinCoach prototype">
@@ -2079,6 +2151,7 @@ const state = {
     payoutHold: false,
   },
   billReminderView: "compact",
+  heroPromptOpen: false,
   habitState: {
     lastSeenDate: "",
     appCheckInStreak: 0,
@@ -2901,10 +2974,12 @@ function normalizeNavRoute(route) {
 }
 
 function bindRouteButtons() {
-  app.querySelectorAll("[data-hero-route]").forEach((hero) => {
-    hero.addEventListener("click", (event) => {
-      if (event.target.closest("button, input, form")) return;
-      setRoute(hero.dataset.heroRoute);
+  app.querySelectorAll("[data-hero-chat-trigger]").forEach((trigger) => {
+    trigger.addEventListener("click", () => {
+      const prompt = app.querySelector("[data-hero-prompt]");
+      if (!prompt) return;
+      prompt.hidden = false;
+      prompt.querySelector("input")?.focus();
     });
   });
 
@@ -3182,7 +3257,8 @@ function bindRouteButtons() {
       const question = input.value.trim();
       if (!question) return;
       state.coachMessages.push({ from: "user", text: question });
-      state.coachMessages.push({ from: "coach", text: coachReply(question) });
+      state.coachMessages.push({ from: "coach", text: coachReply(question, deriveFinancialSnapshot()) });
+      state.heroPromptOpen = true;
       input.value = "";
       if (coachForm.dataset.nextRoute) {
         setRoute(coachForm.dataset.nextRoute);
@@ -3229,14 +3305,25 @@ function renderHome(snapshot) {
   if (screenMeta) screenMeta.textContent = habitLabel;
 
   return `
-    <article class="coach-hero ${heroClass}" data-hero-route="coach-chat" role="button" tabindex="0" aria-label="Open FinCoach chat">
+    <article class="coach-hero ${heroClass}">
       <div class="hero-top">
-        <span class="state-pill ${heroClass}"><span class="state-dot"></span>${coach.label}</span>
-        <h2 class="hero-title">${coach.title}</h2>
-        <p class="hero-copy">
-          <span>${coach.copy.replace(" Tap this space to ask why.", "")}</span>
-          ${coach.copy.includes("Tap this space to ask why.") ? ` <button class="hero-copy-link" type="button" data-route="coach-chat">Tap this space to ask why.</button>` : ""}
-        </p>
+        ${state.heroPromptOpen ? `
+          <span class="state-pill"><span class="state-dot"></span>FinCoach chat</span>
+          <h2 class="hero-title">Let’s think it through.</h2>
+          <p class="hero-copy hero-chat-intro">Ask a follow-up about your bills, buffer, goals, or the strategies below.</p>
+        ` : `
+          <span class="state-pill ${heroClass}"><span class="state-dot"></span>${coach.label}</span>
+          <h2 class="hero-title">${coach.title}</h2>
+          <button class="hero-copy hero-copy-trigger" type="button" data-hero-chat-trigger aria-label="Ask FinCoach a follow-up question">${coach.copy.replace(" Tap this space to ask why.", "")}</button>
+        `}
+        <form class="hero-prompt" data-hero-prompt data-coach-form ${state.heroPromptOpen ? "" : "hidden"}>
+          <input aria-label="Ask FinCoach a follow-up question" placeholder="Ask a follow-up question..." />
+          <button type="submit">Ask</button>
+        </form>
+        ${state.heroPromptOpen && state.coachMessages.length > 1 ? `
+          <div class="hero-conversation" role="log" aria-label="FinCoach conversation">
+            ${state.coachMessages.slice(1).map((message) => `<div class="hero-message ${message.from === "user" ? "user" : "coach"}"><p>${message.text}</p></div>`).join("")}
+          </div>` : ""}
         ${heroClass === "critical" || heroClass === "fraud" || heroClass === "overdraft" ? "" : `
         <div class="safe-spend">
           <div class="dial"><div class="dial-inner">${currency(snapshot.safeToSpend)}</div></div>
@@ -3448,9 +3535,24 @@ function heroStrategies(snapshot) {
       { label: "Push goal progress", route: "goals" },
     ];
   }
+  if (snapshot.safeToSpend < 0 || snapshot.billPressure === "high") {
+    return [
+      { label: "Protect upcoming bills", route: "paydays" },
+      { label: "Find breathing room", route: "hidden-savings" },
+      { label: "Check spending pressure", route: "budgets" },
+    ];
+  }
+  if (snapshot.financialState === "watching" || snapshot.billPressure === "medium") {
+    return [
+      { label: "Keep a small buffer", route: "savings" },
+      { label: "Review cash timing", route: "cash-flow" },
+      { label: "Find hidden savings", route: "hidden-savings" },
+    ];
+  }
   return [
-    { label: "Build cushion", route: "savings" },
-    { label: "Review goals", route: "goals" },
+    { label: "Build emergency buffer", route: "savings" },
+    { label: "Move money toward a goal", route: "goals" },
+    { label: "Learn the next growth step", route: "insights" },
   ];
 }
 
@@ -3516,25 +3618,35 @@ function renderOfferDetail() {
   `;
 }
 
-function coachReply(question) {
+function coachReply(question, snapshot = deriveFinancialSnapshot()) {
   const lower = question.toLowerCase();
   if (lower.includes("100") || lower.includes("hidden") || lower.includes("find") || lower.includes("save")) {
-    return "I found a possible $100 in breathing room: $22 from a subscription pause, $30 from dining guardrails, $15 from a grocery offer, $18 from transport timing, and $15 from moving leftover bill buffer after electric clears.";
+    return `I found a possible $100 in breathing room: $22 from a subscription pause, $30 from dining guardrails, $15 from a grocery offer, $18 from transport timing, and $15 from moving leftover bill buffer after electric clears. Because your current safe-to-spend amount is ${currency(snapshot.safeToSpend)}, I would review the bills first and treat these as options, not promises.`;
   }
 
   if (lower.includes("why") || lower.includes("rent") || lower.includes("bill")) {
-    return "The main pressure is timing: rent and electric arrive before your buffer fully rebuilds. The lowest-stress path is to cover the rent gap first, then review flexible spending after essentials are safe.";
+    return `The main pressure is timing: ${currency(snapshot.safeToSpend)} is left after near-term essentials, with ${snapshot.billPressure} bill pressure. The lowest-stress path is to protect the next essential bill first, then review flexible spending after essentials are safe.`;
+  }
+
+  if (lower.includes("safe") || lower.includes("afford") || lower.includes("spend today") || lower.includes("spend")) {
+    return snapshot.safeToSpend < 0
+      ? `Right now, I would treat your safe-to-spend amount as $0. The forecast is ${currency(Math.abs(snapshot.safeToSpend))} short after upcoming essentials, so spending more could increase the gap. Let’s protect the bills first, then reassess after the next income arrives.`
+      : `Your current safe-to-spend estimate is ${currency(snapshot.safeToSpend)} after upcoming essentials. That is a planning estimate, not permission to spend it all at once; leave room for pending transactions and your next bill.`;
   }
 
   if (lower.includes("savings")) {
-    return "A small savings action is useful only after the near-term bills are protected. Today, I would keep the move small: $10-$50, then revisit after Friday.";
+    return snapshot.safeToSpend < 0
+      ? `I would not move money to savings before the essentials are covered. Your current gap is ${currency(Math.abs(snapshot.safeToSpend))}; first review bill timing or breathing-room options, then restart with a small transfer.`
+      : `A small savings action fits this moment because ${currency(snapshot.safeToSpend)} remains after essentials. Start with $10-$50, then revisit after your next payday.`;
   }
 
   if (lower.includes("learn") || lower.includes("lesson")) {
     return "A helpful lesson here is buffer before budget: when cash timing is tight, a small liquid cushion matters more than perfect category tracking.";
   }
 
-  return "What matters now is reducing surprise. I would first protect the upcoming bill, then clear the two transactions that are making the forecast less certain.";
+  return snapshot.unreadAlerts > 0
+    ? `What matters now is reducing surprise. You have ${snapshot.unreadAlerts} transaction${snapshot.unreadAlerts === 1 ? "" : "s"} to review, and your safe-to-spend amount is ${currency(snapshot.safeToSpend)}. I would review those before choosing a larger move.`
+    : `What matters now is choosing one manageable next step. Your safe-to-spend amount is ${currency(snapshot.safeToSpend)} after essentials, so I would ${snapshot.financialState === "stable" ? "build the emergency buffer or move money toward a goal" : "review cash timing before committing to a new transfer"}.`;
 }
 
 function renderCoachChat(snapshot) {
@@ -4587,7 +4699,6 @@ document.querySelectorAll("[data-route]").forEach((button) => {
 render();
 
 </script>
-    <script src="./analytics.js"></script>
   </body>
 </html>
 
