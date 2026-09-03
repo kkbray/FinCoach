@@ -3,6 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#3157ff" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <link rel="manifest" href="manifest.webmanifest" />
     <title>FinCoach Prototype</title>
     <style>
 :root {
@@ -28,6 +33,8 @@
 body {
   margin: 0;
   min-height: 100vh;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
   font-family:
     Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   color: var(--ink);
@@ -47,6 +54,7 @@ button {
   display: grid;
   place-items: center;
   padding: 24px 12px;
+  padding-bottom: calc(24px + env(safe-area-inset-bottom));
 }
 
 .phone-frame {
@@ -983,6 +991,7 @@ h1 {
   left: 12px;
   right: 12px;
   bottom: 12px;
+  padding-bottom: calc(7px + env(safe-area-inset-bottom));
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 6px;
@@ -2822,6 +2831,19 @@ function contextCards(snapshot) {
     route: "hidden-savings",
   });
 
+  const scenarioCardIds = {
+    fraud: ["suspicious-activity", "pending-transactions", "alert-transaction-review", "hidden-savings"],
+    overdraft: ["alert-low-balance", "overspending-watch", "low-balance-guard", "hidden-savings"],
+    "bill-heavy": ["alert-low-balance", "overspending-watch", "alert-transaction-review", "hidden-savings"],
+    "buffer-watch": ["overspending-watch", "hidden-savings", "habit-ladder", "pending-transactions"],
+    growth: ["hidden-savings", "habit-ladder", "category", "pending-transactions"],
+  }[state.demoScenario];
+  if (scenarioCardIds) {
+    const prioritized = scenarioCardIds.map((id) => cards.find((card) => card.id === id)).filter(Boolean);
+    const remaining = cards.filter((card) => !scenarioCardIds.includes(card.id));
+    return [...prioritized, ...remaining].slice(0, 5);
+  }
+
   return cards.slice(0, 5);
 }
 
@@ -3257,7 +3279,22 @@ function bindRouteButtons() {
       const question = input.value.trim();
       if (!question) return;
       state.coachMessages.push({ from: "user", text: question });
-      state.coachMessages.push({ from: "coach", text: coachReply(question, deriveFinancialSnapshot()) });
+      const snapshot = deriveFinancialSnapshot();
+      let reply = coachReply(question, snapshot);
+      try {
+        const response = await fetch("http://127.0.0.1:3001/api/coach", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ question, snapshot, strategies: heroStrategies(snapshot) }),
+        });
+        if (response.ok) {
+          const data = await response.json();
+          if (data.heroMessage) reply = data.heroMessage;
+        }
+      } catch (_error) {
+        // Keep the local deterministic coach available when the backend is offline.
+      }
+      state.coachMessages.push({ from: "coach", text: reply });
       state.heroPromptOpen = true;
       input.value = "";
       if (coachForm.dataset.nextRoute) {
@@ -3632,6 +3669,22 @@ function coachReply(question, snapshot = deriveFinancialSnapshot()) {
     return snapshot.safeToSpend < 0
       ? `Right now, I would treat your safe-to-spend amount as $0. The forecast is ${currency(Math.abs(snapshot.safeToSpend))} short after upcoming essentials, so spending more could increase the gap. Let’s protect the bills first, then reassess after the next income arrives.`
       : `Your current safe-to-spend estimate is ${currency(snapshot.safeToSpend)} after upcoming essentials. That is a planning estimate, not permission to spend it all at once; leave room for pending transactions and your next bill.`;
+  }
+
+  if (lower.includes("how long") || lower.includes("covered") || lower.includes("days") || lower.includes("protected")) {
+    const essentialTotal = bills.filter((bill) => bill.isEssential && ["upcoming", "scheduled"].includes(bill.status)).reduce((sum, bill) => sum + bill.amount, 0);
+    const coverage = Math.max(0, Math.floor((snapshot.safeToSpend + essentialTotal) / Math.max(essentialTotal, 1) * 7));
+    return snapshot.safeToSpend < 0
+      ? `Your current balance does not fully cover the ${currency(essentialTotal)} of upcoming essentials; the forecast is ${currency(Math.abs(snapshot.safeToSpend))} short. I would treat the bills as needing action now rather than assuming they are protected.`
+      : `Your current balance covers the listed upcoming essentials of ${currency(essentialTotal)}. Based on this snapshot, that gives you roughly ${coverage} days of breathing room before we should reassess, especially when pending transactions or income timing changes.`;
+  }
+
+  if (lower.includes("goal") || lower.includes("vacation") || lower.includes("emergency") || lower.includes("buffer")) {
+    const primaryGoal = goals[0];
+    const remaining = Math.max(0, primaryGoal.targetAmount - primaryGoal.currentAmount);
+    return snapshot.safeToSpend < 0
+      ? `Your ${primaryGoal.name.toLowerCase()} is ${currency(remaining)} from its target, but the immediate priority is the ${currency(Math.abs(snapshot.safeToSpend))} near-term gap. Protect essentials first; a small goal contribution can restart after the next income arrives.`
+      : `Your ${primaryGoal.name.toLowerCase()} is ${currency(remaining)} from its target. Because ${currency(snapshot.safeToSpend)} remains after essentials, you can compare a small buffer contribution with your other goal and choose the one that gives you the most confidence.`;
   }
 
   if (lower.includes("savings")) {
@@ -4695,6 +4748,10 @@ function workflowCard(title, copy, route) {
 document.querySelectorAll("[data-route]").forEach((button) => {
   button.addEventListener("click", () => setRoute(button.dataset.route));
 });
+
+if ("serviceWorker" in navigator && location.protocol !== "file:") {
+  window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+}
 
 render();
 

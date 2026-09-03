@@ -1,0 +1,11 @@
+{
+  "name": "FinCoach Prototype",
+  "short_name": "FinCoach",
+  "description": "A calm, coaching-first money companion.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f7f9fc",
+  "theme_color": "#3157ff",
+  "orientation": "portrait",
+  "icons": []
+}
