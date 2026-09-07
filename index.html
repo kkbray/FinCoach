@@ -3273,7 +3273,7 @@ function bindRouteButtons() {
 
   const coachForm = app.querySelector("[data-coach-form]");
   if (coachForm) {
-    coachForm.addEventListener("submit", (event) => {
+    coachForm.addEventListener("submit", async (event) => {
       event.preventDefault();
       const input = coachForm.querySelector("input");
       const question = input.value.trim();
