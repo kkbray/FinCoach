@@ -165,6 +165,15 @@ h1 {
   transform: scale(0.98);
 }
 
+.choice-help {
+  display: block;
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
 .icon-button {
   width: 44px;
   height: 44px;
@@ -722,7 +731,27 @@ h1 {
 }
 
 .screen-heading {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px;
   margin: 2px 2px 14px;
+}
+
+.back-button {
+  align-self: start;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.86);
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.back-button:active {
+  transform: translateY(1px);
 }
 
 .screen-heading p {
@@ -1331,7 +1360,7 @@ h1 {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-top: 12px;
+  margin-top: 0;
 }
 
 .coach-thread {
@@ -1450,7 +1479,7 @@ h1 {
   z-index: 2;
   display: grid;
   gap: 8px;
-  max-height: 112px;
+  max-height: 194px;
   margin-top: 10px;
   overflow-y: auto;
   padding-right: 4px;
@@ -1463,8 +1492,8 @@ h1 {
   border-radius: 12px;
   color: #fff;
   background: rgba(0, 0, 0, 0.18);
-  font-size: 12px;
-  line-height: 1.35;
+  font-size: 15px;
+  line-height: 1.28;
 }
 
 .hero-message.user {
@@ -1472,6 +1501,12 @@ h1 {
   color: #05271f;
   background: rgba(184, 255, 231, 0.92);
 }
+
+.hero-message.coach {
+  max-width: 96%;
+  padding: 11px 13px;
+}
+
 
 .hero-message p {
   margin: 0;
@@ -2128,6 +2163,7 @@ const state = {
   authState: "signed_out",
   userProfile: {
     displayName: "",
+    coachDetail: "context",
     incomeType: "salary",
     incomeTiming: "weekly",
     goalPriority: "buffer",
@@ -2181,6 +2217,7 @@ const state = {
       text: "Ask me what matters now, why I recommended an action, or which lesson can help.",
     },
   ],
+  coachSource: "local",
   wins: [
     { id: "w1", title: "Reviewed Friday rent", date: "May 14", source: "money move" },
     { id: "w2", title: "Skipped impulse lunch order", date: "May 13", source: "manual" },
@@ -2346,28 +2383,26 @@ function currencyInputValue(value) {
 }
 function buildBudgetSeed(profile) {
   const monthlyIncome = Math.max(Number(profile.monthlyIncome) || 0, 0);
-  const essentials = Math.max(Number(profile.monthlyEssentials) || 0, 0);
   const incomeType = profile.incomeType || "salary";
   const incomeConfidence = incomeType === "gig" ? 0.72 : incomeType === "mixed" ? 0.88 : 1;
   const taxReserveRate = incomeType === "gig" ? 0.18 : incomeType === "mixed" ? 0.12 : 0.08;
   const conservativeIncome = Math.max(0, Math.round(monthlyIncome * incomeConfidence));
   const taxReserve = Math.round(conservativeIncome * taxReserveRate);
-  const remaining = Math.max(0, conservativeIncome - essentials - taxReserve);
-  const discretionary = Math.max(0, Math.round(remaining * 0.22));
-  const savings = Math.max(0, Math.round(remaining * 0.18));
-  const transport = Math.max(0, Math.round(remaining * 0.14));
-  const dining = Math.max(0, Math.round(remaining * 0.12));
-  const groceries = Math.max(0, Math.round(remaining * 0.18));
-  const misc = Math.max(0, remaining - (discretionary + savings + transport + dining + groceries));
+  const housing = Math.round(conservativeIncome * 0.30);
+  const groceries = Math.round(conservativeIncome * 0.10);
+  const transport = Math.round(conservativeIncome * 0.10);
+  const savings = Math.round(conservativeIncome * 0.10);
+  const dining = Math.round(conservativeIncome * 0.05);
+  const discretionary = Math.max(0, conservativeIncome - housing - groceries - transport - savings - dining - taxReserve);
 
   return [
-    { id: "seed-housing", name: "Housing", spent: Math.max(0, Math.round(essentials * 0.58)), target: Math.max(0, Math.round(essentials * 0.6)) },
+    { id: "seed-housing", name: "Housing", spent: 0, target: housing },
     { id: "seed-groceries", name: "Groceries", spent: 0, target: groceries || 200 },
     { id: "seed-transport", name: "Transport", spent: 0, target: transport || 120 },
     { id: "seed-dining", name: "Dining", spent: 0, target: dining || 80 },
     { id: "seed-savings", name: "Savings", spent: 0, target: savings || 150 },
     { id: "seed-tax", name: "Tax reserve", spent: 0, target: taxReserve || 100 },
-    { id: "seed-discretionary", name: "Discretionary", spent: 0, target: discretionary || misc || 100 },
+    { id: "seed-discretionary", name: "Discretionary", spent: 0, target: discretionary || 100 },
   ];
 }
 
@@ -3009,6 +3044,10 @@ function bindRouteButtons() {
     button.addEventListener("click", () => setRoute(button.dataset.route));
   });
 
+  app.querySelectorAll("[data-back]").forEach((button) => {
+    button.addEventListener("click", () => setRoute(state.lastRoute && state.lastRoute !== state.route ? state.lastRoute : "home"));
+  });
+
   app.querySelectorAll("[data-complete]").forEach((button) => {
     button.addEventListener("click", () => {
       completeAction(button.dataset.complete);
@@ -3275,9 +3314,17 @@ function bindRouteButtons() {
   if (coachForm) {
     coachForm.addEventListener("submit", async (event) => {
       event.preventDefault();
+      if (coachForm.dataset.pending === "true") return;
       const input = coachForm.querySelector("input");
+      const submitButton = coachForm.querySelector("button[type=submit]");
       const question = input.value.trim();
       if (!question) return;
+      coachForm.dataset.pending = "true";
+      input.disabled = true;
+      if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.textContent = "Thinking...";
+      }
       state.coachMessages.push({ from: "user", text: question });
       const snapshot = deriveFinancialSnapshot();
       let reply = coachReply(question, snapshot);
@@ -3285,14 +3332,16 @@ function bindRouteButtons() {
         const response = await fetch("http://127.0.0.1:3001/api/coach", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ question, snapshot, strategies: heroStrategies(snapshot) }),
+          body: JSON.stringify({ question, snapshot, strategies: heroStrategies(snapshot), coachDetail: state.userProfile.coachDetail }),
         });
         if (response.ok) {
           const data = await response.json();
           if (data.heroMessage) reply = data.heroMessage;
+          state.coachSource = data.source === "llm" ? "llm" : "fallback";
         }
       } catch (_error) {
         // Keep the local deterministic coach available when the backend is offline.
+        state.coachSource = "local";
       }
       state.coachMessages.push({ from: "coach", text: reply });
       state.heroPromptOpen = true;
@@ -3344,11 +3393,7 @@ function renderHome(snapshot) {
   return `
     <article class="coach-hero ${heroClass}">
       <div class="hero-top">
-        ${state.heroPromptOpen ? `
-          <span class="state-pill"><span class="state-dot"></span>FinCoach chat</span>
-          <h2 class="hero-title">Let’s think it through.</h2>
-          <p class="hero-copy hero-chat-intro">Ask a follow-up about your bills, buffer, goals, or the strategies below.</p>
-        ` : `
+        ${state.heroPromptOpen ? "" : `
           <span class="state-pill ${heroClass}"><span class="state-dot"></span>${coach.label}</span>
           <h2 class="hero-title">${coach.title}</h2>
           <button class="hero-copy hero-copy-trigger" type="button" data-hero-chat-trigger aria-label="Ask FinCoach a follow-up question">${coach.copy.replace(" Tap this space to ask why.", "")}</button>
@@ -3421,6 +3466,14 @@ function renderOnboarding(snapshot) {
             <span>Name</span>
             <input data-onboarding-input="displayName" type="text" placeholder="Your name" value="${state.userProfile.displayName || ""}" />
           </label>
+          <div class="onboarding-field" style="grid-column:1 / -1;">
+            <span>How should FinCoach explain things?</span>
+            <div class="workflow-choices">
+              <button class="choice-button onboarding-choice ${state.userProfile.coachDetail === "teach" ? "selected" : ""}" type="button" data-onboarding-set="coachDetail" data-value="teach">Teach me as we go</button>
+              <button class="choice-button onboarding-choice ${state.userProfile.coachDetail === "context" ? "selected" : ""}" type="button" data-onboarding-set="coachDetail" data-value="context">Give me useful context</button>
+              <button class="choice-button onboarding-choice ${state.userProfile.coachDetail === "brief" ? "selected" : ""}" type="button" data-onboarding-set="coachDetail" data-value="brief">Just the next move</button>
+            </div>
+          </div>
         </div>
         <button class="choice-button onboarding-choice" type="button" data-onboarding-next>Next</button>
       `,
@@ -3451,7 +3504,7 @@ function renderOnboarding(snapshot) {
     },
     {
       title: "Set a simple budget baseline",
-      copy: "You can edit this later. We just need a starting point for manual budgets and coaching.",
+      copy: "Enter your income once. FinCoach will make a starting budget that you can change later.",
       body: `
         <div class="workflow-choices">
           <label class="onboarding-field">
@@ -3471,19 +3524,19 @@ function renderOnboarding(snapshot) {
         </div>
         <div class="onboarding-note">
           <strong>Budget preview</strong>
-          <p>${currency(snapshot.conservativeMonthlyIncome)} conservative income, ${currency(snapshot.taxReserve)} tax reserve, and ${currency(snapshot.monthlyFlexibleSurplus)} left for category budgets.</p>
+          <p>${currency(snapshot.conservativeMonthlyIncome)} estimated income with a starting split for housing, food, transportation, savings, and spending. You can adjust every amount later.</p>
         </div>
         <button class="choice-button onboarding-choice" type="button" data-onboarding-next>Next</button>
       `,
     },
     {
       title: "Set a goal",
-      copy: "You can skip this and come back later from Goals.",
+      copy: "Choose what you want your money to help with first. You can skip this and come back later from Goals.",
       body: `
         <div class="workflow-choices">
-          <button class="choice-button onboarding-choice ${state.userProfile.goalPriority === "buffer" ? "selected" : ""}" type="button" data-onboarding-set="goalPriority" data-value="buffer">Build emergency buffer</button>
-          <button class="choice-button onboarding-choice ${state.userProfile.goalPriority === "debt" ? "selected" : ""}" type="button" data-onboarding-set="goalPriority" data-value="debt">Pay down debt</button>
-          <button class="choice-button onboarding-choice ${state.userProfile.goalPriority === "savings" ? "selected" : ""}" type="button" data-onboarding-set="goalPriority" data-value="savings">Grow savings</button>
+          <button class="choice-button onboarding-choice ${state.userProfile.goalPriority === "buffer" ? "selected" : ""}" type="button" data-onboarding-set="goalPriority" data-value="buffer">Build emergency buffer<span class="choice-help">A cash cushion for surprise costs or a difficult month.</span></button>
+          <button class="choice-button onboarding-choice ${state.userProfile.goalPriority === "debt" ? "selected" : ""}" type="button" data-onboarding-set="goalPriority" data-value="debt">Pay down debt<span class="choice-help">Reduce balances and the interest that can make them grow.</span></button>
+          <button class="choice-button onboarding-choice ${state.userProfile.goalPriority === "savings" ? "selected" : ""}" type="button" data-onboarding-set="goalPriority" data-value="savings">Grow savings<span class="choice-help">Set money aside for a planned goal, like a car or vacation.</span></button>
         </div>
         <div class="workflow-choices">
           <button class="choice-button onboarding-choice" type="button" data-onboarding-finish>Save goals</button>
@@ -3658,7 +3711,7 @@ function renderOfferDetail() {
 function coachReply(question, snapshot = deriveFinancialSnapshot()) {
   const lower = question.toLowerCase();
   if (lower.includes("100") || lower.includes("hidden") || lower.includes("find") || lower.includes("save")) {
-    return `I found a possible $100 in breathing room: $22 from a subscription pause, $30 from dining guardrails, $15 from a grocery offer, $18 from transport timing, and $15 from moving leftover bill buffer after electric clears. Because your current safe-to-spend amount is ${currency(snapshot.safeToSpend)}, I would review the bills first and treat these as options, not promises.`;
+    return `Short answer: yes, there may be about $100 of monthly breathing room, but it is not confirmed yet. I found possible options of $22 from a subscription pause, $30 from dining guardrails, $15 from a grocery offer, $18 from transport timing, and $15 from leftover bill buffer after electric clears. Because your current safe-to-spend amount is ${currency(snapshot.safeToSpend)}, I would protect upcoming bills first, then review the subscription and dining options. These are estimates, not promises.`;
   }
 
   if (lower.includes("why") || lower.includes("rent") || lower.includes("bill")) {
@@ -3667,8 +3720,8 @@ function coachReply(question, snapshot = deriveFinancialSnapshot()) {
 
   if (lower.includes("safe") || lower.includes("afford") || lower.includes("spend today") || lower.includes("spend")) {
     return snapshot.safeToSpend < 0
-      ? `Right now, I would treat your safe-to-spend amount as $0. The forecast is ${currency(Math.abs(snapshot.safeToSpend))} short after upcoming essentials, so spending more could increase the gap. Let’s protect the bills first, then reassess after the next income arrives.`
-      : `Your current safe-to-spend estimate is ${currency(snapshot.safeToSpend)} after upcoming essentials. That is a planning estimate, not permission to spend it all at once; leave room for pending transactions and your next bill.`;
+      ? `Short answer: I would treat safe-to-spend as $0 today. The forecast is ${currency(Math.abs(snapshot.safeToSpend))} short after upcoming essentials, so spending more could increase the gap. Choose Protect upcoming bills, then reassess after the next income arrives.`
+      : `Short answer: your current safe-to-spend estimate is ${currency(snapshot.safeToSpend)} after upcoming essentials. That is a planning estimate, not permission to spend it all at once. Leave room for pending transactions and your next bill; Find breathing room is the best next step if you want more flexibility.`;
   }
 
   if (lower.includes("how long") || lower.includes("covered") || lower.includes("days") || lower.includes("protected")) {
@@ -3964,7 +4017,9 @@ function renderHabits(snapshot) {
     </div>
     <article class="list-card">
       <h3>Current habit</h3>
-      <p><strong>${habit.stage}:</strong> ${habit.action}. Reward: ${habit.reward}.</p>
+      <p><strong>${habit.stage}:</strong> ${habit.cue}</p>
+      <p class="muted">One small action today: ${habit.action}. ${habit.reward}.</p>
+      <button class="cta" type="button" data-complete="${habit.action}" data-next="habits">Mark complete</button>
     </article>
     <article class="list-card">
       <h3>Next step</h3>
@@ -4316,7 +4371,8 @@ function renderSettings(snapshot) {
     </article>
     <article class="settings-card">
       <h3>Data mode</h3>
-      <p>Fake data only. No bank connection is active.</p>
+      <p><strong>Financial data:</strong> Demo snapshot. No bank connection is active.</p>
+      <p class="connection-status"><strong>Coach service:</strong> ${state.coachSource === "llm" ? "Live AI connected" : state.coachSource === "fallback" ? "Backend fallback" : "Local prototype"}</p>
     </article>
     <article class="settings-card">
       <h3>Auth flows</h3>
@@ -4728,7 +4784,7 @@ function renderAddFunds() {
 }
 
 function screenHeading(title, copy) {
-  return `<div class="screen-heading"><p>${copy}</p></div>`;
+  return `<div class="screen-heading"><button class="back-button" type="button" data-back aria-label="Go back">&lt;</button><p>${copy}</p></div>`;
 }
 
 function metric(label, value) {
